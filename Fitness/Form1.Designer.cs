@@ -57,7 +57,6 @@ namespace Fitness
             this.label9 = new System.Windows.Forms.Label();
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
-            this.textBox6 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.textBox5 = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
@@ -76,6 +75,7 @@ namespace Fitness
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -84,6 +84,7 @@ namespace Fitness
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Controls.Add(this.textBox12);
             this.groupBox1.Controls.Add(this.label14);
             this.groupBox1.Controls.Add(this.groupBox4);
@@ -94,7 +95,6 @@ namespace Fitness
             this.groupBox1.Controls.Add(this.label9);
             this.groupBox1.Controls.Add(this.textBox7);
             this.groupBox1.Controls.Add(this.label8);
-            this.groupBox1.Controls.Add(this.textBox6);
             this.groupBox1.Controls.Add(this.label7);
             this.groupBox1.Controls.Add(this.textBox5);
             this.groupBox1.Controls.Add(this.label6);
@@ -319,14 +319,6 @@ namespace Fitness
             this.label8.TabIndex = 18;
             this.label8.Text = "Aktivna od:";
             // 
-            // textBox6
-            // 
-            this.textBox6.Location = new System.Drawing.Point(120, 434);
-            this.textBox6.Name = "textBox6";
-            this.textBox6.ReadOnly = true;
-            this.textBox6.Size = new System.Drawing.Size(213, 22);
-            this.textBox6.TabIndex = 17;
-            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -484,6 +476,14 @@ namespace Fitness
             this.listBox1.Size = new System.Drawing.Size(568, 772);
             this.listBox1.TabIndex = 0;
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(120, 434);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(213, 24);
+            this.comboBox1.TabIndex = 28;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -526,7 +526,6 @@ namespace Fitness
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox textBox5;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox textBox6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.Label label8;
@@ -550,6 +549,7 @@ namespace Fitness
         private System.Windows.Forms.Label label14;
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.TextBox textBox13;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }
 
