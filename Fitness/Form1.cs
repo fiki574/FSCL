@@ -28,6 +28,8 @@ namespace Fitness
     {
         public static SQLiteConnection m_dbConnection;
         public static bool loaded;
+        public static bool usluga;
+        public static bool produlji;
 
         public Form1()
         {
@@ -38,6 +40,8 @@ namespace Fitness
             aTimer.Enabled = true;
             textBox1.KeyDown += new KeyEventHandler(textBox1_KeyDown);
             loaded = false;
+            usluga = false;
+            produlji = false;
 
             try
             {
@@ -96,8 +100,9 @@ namespace Fitness
                     }
                     else
                     {
-                        MessageBox.Show("Korisnik ne postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         loaded = false;
+                        EmptyAll();
+                        MessageBox.Show("Korisnik ne postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
                 else
@@ -168,6 +173,7 @@ namespace Fitness
                                 novi.AktivnaDo = "";
                                 FitnessDB.Korisnici.Add(novi);
                                 MessageBox.Show("Korisnik uspješno dodan!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                FitnessDB.Korisnici.Load();
                                 textBox9.Text = "";
                                 textBox10.Text = "";
                                 textBox11.Text = "";
@@ -216,16 +222,23 @@ namespace Fitness
 
                     if(!contains)
                     {
-                        //todo: provjera je li član ima valjanu članarinu
-                        //todo: zadnji dolazak
-                        listBox1.Items.Add(item);
-                        string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
-                        Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
-                        if(d.Index > 0)
+                        if (textBox6.Text != "nema aktivne usluge")
                         {
-                            d.BrojDolazaka += 1;
-                            FitnessDB.Dolasci.Update(d);
+                            listBox1.Items.Add(item);
+                            string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
+                            Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
+                            if (d.Index > 0)
+                            {
+                                d.BrojDolazaka += 1;
+                                FitnessDB.Dolasci.Update(d);
+                            }
+
+                            int bi = Convert.ToInt32(textBox1.Text);
+                            Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                            k.ZadnjiDolazak = danas + " " + DateTime.Now.Hour + ":" + DateTime.Now.Minute;
+                            FitnessDB.Korisnici.Update(k);
                         }
+                        else MessageBox.Show("Korisnik nema aktivnu uslugu!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                         
                     System.Threading.Thread.Sleep(100);
@@ -258,12 +271,42 @@ namespace Fitness
 
         private void button6_Click(object sender, EventArgs e)
         {
-            //produlji članarinu
+            if (loaded)
+            {
+                if (textBox6.Text != "nema aktivne usluge")
+                {
+                    if (!produlji)
+                    {
+                        textBox8.ReadOnly = false;
+                        button6.Text = "Spremi";
+                        produlji = true;
+                    }
+                    else if (produlji)
+                    {
+                        string datum = textBox8.Text;
+                        if (IsDigitsOnly(datum, true))
+                        {
+                            if (!String.IsNullOrEmpty(textBox1.Text) && IsDigitsOnly(textBox1.Text))
+                            {
+                                int bi = Convert.ToInt32(textBox1.Text);
+                                Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                                k.AktivnaDo = datum;
+                                FitnessDB.Korisnici.Update(k);
+                                textBox8.ReadOnly = true;
+                                MessageBox.Show("Usluga uspješno produljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        else MessageBox.Show("Datum rođenja striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+            else MessageBox.Show("Nije odabran niti jedan član!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //naši po imenu i prezimenu
+            //nađi po imenu i prezimenu
         }
     }
 }
