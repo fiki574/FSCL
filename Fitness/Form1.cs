@@ -117,6 +117,20 @@ namespace Fitness
                     Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
                     if (k.Index > 0)
                     {
+                        if(k.AktivnaUsluga != "nema aktivne usluge")
+                        {
+                            string[] date = k.AktivnaDo.Split(new char[] { '.' });
+                            DateTime dt = new DateTime(Convert.ToInt32(date[2]), Convert.ToInt32(date[1]), Convert.ToInt32(date[0]));
+                            TimeSpan diff = dt - DateTime.Today;
+                            if (diff.Days < 0)
+                            {
+                                k.AktivnaUsluga = "nema aktivne usluge";
+                                k.AktivnaOd = "";
+                                k.AktivnaDo = "";
+                                FitnessDB.Korisnici.Update(k);
+                            }
+                        }
+
                         textBox2.Text = k.Ime;
                         textBox3.Text = k.Prezime;
                         textBox4.Text = k.DatumUclanjenja;
@@ -253,6 +267,7 @@ namespace Fitness
                                 novi.AktivnaDo = "";
                                 FitnessDB.Korisnici.Add(novi);
                                 MessageBox.Show("Korisnik uspješno dodan!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                FitnessDB.Korisnici.Load();
                                 textBox9.Text = "";
                                 textBox10.Text = "";
                                 textBox11.Text = "";
@@ -303,7 +318,6 @@ namespace Fitness
                     {
                         if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
                         {
-                            //TODO: provjera ako je usluga baš danas/jučer istekla
                             //TODO: smanjiti broj preostalih dolazaka u slučaju usluge sa ograničenim brojem dolazaka
                             listBox1.Items.Add(item);
                             string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
@@ -377,7 +391,11 @@ namespace Fitness
                             }
                             int slj_mjesec = GetDaysInMonth(mjesec+1, godina);
                             int razlika = ovaj_mjesec - slj_mjesec;
-                            if(razlika > 0) dan = razlika;
+                            if (razlika > 0)
+                            {
+                                dan = razlika;
+                                mjesec += 1;
+                            }
                             k.AktivnaDo = dan + "." + (mjesec+1).ToString() + "." + godina;
                             FitnessDB.Korisnici.Update(k);
                             comboBox1.Enabled = false;
