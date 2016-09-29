@@ -86,6 +86,7 @@ namespace Fitness
                     dol.Datum = danas;
                     dol.BrojDolazaka = 0;
                     FitnessDB.Dolasci.Add(dol);
+                    File.Copy("fitness.sqlite", "fitness_backup.sqlite");
                 }
             }
             catch (Exception ex)

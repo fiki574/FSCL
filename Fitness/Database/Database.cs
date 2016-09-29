@@ -101,7 +101,7 @@ namespace Fitness.Database
             using (var cmd = m_connection.CreateCommand())
             {
                 bool first = true;
-                foreach (var field in type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+                foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
                 {
                     if (first) first = false;
                     else
@@ -141,7 +141,7 @@ namespace Fitness.Database
             using (var cmd = m_connection.CreateCommand())
             {
                 bool first = true;
-                foreach (var field in type.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+                foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
                 {
                     if (field.Name == "Index") continue;
                     if (first) first = false;
