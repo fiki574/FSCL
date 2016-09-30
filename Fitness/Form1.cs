@@ -31,6 +31,7 @@ namespace Fitness
         public static bool loaded;
         public static bool usluga;
         public static bool produlji;
+        public static bool promijeni;
 
         private ContextMenuStrip listboxContextMenu;
 
@@ -52,20 +53,23 @@ namespace Fitness
             listboxContextMenu.Click += new EventHandler(OnClick);
             listBox1.ContextMenuStrip = listboxContextMenu;
 
-            //TODO: još opcija
             comboBox1.Items.Add("nema aktivne usluge");
             comboBox1.Items.Add("TERETANA NEO");
             comboBox1.Items.Add("TERETANA NEO DO 16H");
             comboBox1.Items.Add("TERETANA SA POP NEO");
             comboBox1.Items.Add("TERETANA SA POP DO 16H");
+            comboBox1.Items.Add("TERETANA 12 DOLAZAKA");
             comboBox1.Items.Add("GRUPNI TRENINZI 2X TJEDNO");
             comboBox1.Items.Add("GRUPNI TRENINZI NEO");
+            comboBox1.Items.Add("GRUPNI TRENINZI SA POP NEO");
             comboBox1.Items.Add("KOREKTIVNA");
+            comboBox1.Items.Add("POJEDINAČNI TRENING");
             comboBox1.Enabled = false;
 
             loaded = false;
             usluga = false;
             produlji = false;
+            promijeni = false;
 
             try
             {
@@ -86,7 +90,8 @@ namespace Fitness
                     dol.Datum = danas;
                     dol.BrojDolazaka = 0;
                     FitnessDB.Dolasci.Add(dol);
-                    File.Copy("fitness.sqlite", "fitness_backup.sqlite");
+                    if (!File.Exists("fitness_backup.sqlite"))
+                        File.Copy("fitness.sqlite", "fitness_backup.sqlite");
                 }
             }
             catch (Exception ex)
@@ -98,7 +103,7 @@ namespace Fitness
 
         private void OnClick(object sender, EventArgs e)
         {
-            if(listBox1.SelectedItem != null)
+            if (listBox1.SelectedItem != null)
                 listBox1.Items.Remove(listBox1.SelectedItem);
         }
 
@@ -112,13 +117,13 @@ namespace Fitness
         {
             if (e.KeyCode == Keys.Enter)
             {
-                if (!String.IsNullOrEmpty(textBox1.Text) && IsDigitsOnly(textBox1.Text))
+                if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                 {
                     int bi = Convert.ToInt32(textBox1.Text);
                     Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
                     if (k.Index > 0)
                     {
-                        if(k.AktivnaUsluga != "nema aktivne usluge")
+                        if (k.AktivnaUsluga != "nema aktivne usluge")
                         {
                             string[] date = k.AktivnaDo.Split(new char[] { '.' });
                             DateTime dt = new DateTime(Convert.ToInt32(date[2]), Convert.ToInt32(date[1]), Convert.ToInt32(date[0]));
@@ -138,7 +143,7 @@ namespace Fitness
                         textBox12.Text = k.DatumRodenja;
                         richTextBox1.Text = k.Napomena;
                         textBox5.Text = k.ZadnjiDolazak;
-                        comboBox1.SelectedIndex = UslugaToIndex(k.AktivnaUsluga);
+                        comboBox1.SelectedIndex = Utilities.UslugaToIndex(k.AktivnaUsluga);
                         textBox7.Text = k.AktivnaOd;
                         textBox8.Text = k.AktivnaDo;
                         loaded = true;
@@ -158,72 +163,7 @@ namespace Fitness
             }
         }
 
-        public static int UslugaToIndex(string usluga)
-        {
-            //TODO: još opcija
-            if (usluga == "nema aktivne usluge")
-                return 0;
-            else if (usluga == "TERETANA NEO")
-                return 1;
-            else if (usluga == "TERETANA NEO DO 16H")
-                return 2;
-            else if (usluga == "TERETANA SA POP NEO")
-                return 3;
-            else if (usluga == "TERETANA SA POP DO 16H")
-                return 4;
-            else if (usluga == "GRUPNI TRENINZI 2X TJEDNO")
-                return 5;
-            else if (usluga == "GRUPNI TRENINZI NEO")
-                return 6;
-            else if (usluga == "KOREKTIVNA")
-                return 7;
-            else
-                return 0;
-        }
-
-        public static int GetDaysInMonth(int month, int year)
-        {
-            if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) return 31;
-            else if (month == 4 || month == 6 || month == 9 || month == 11) return 30;
-            else if (month == 2) return IsLeapYear(year) == true ? 29 : 28;
-            else return 0;
-        }
-
-        public static bool IsLeapYear(int year)
-        {
-            if (year % 4 == 0)
-            {
-                if (year % 100 == 0)
-                {
-                    if (year % 400 == 0) return true;
-                    else return false;
-                }
-                else return true;
-            }
-            else return false;
-        }
-
-        private void textBox23_KeyDown(object sender, KeyEventArgs e)
-        {
-            if(e.KeyCode == Keys.Enter) button2_Click(sender, e);
-        }
-
-        public static bool IsDigitsOnly(string str, bool allow_dot = false)
-        {
-            if (!allow_dot)
-                foreach (char c in str)
-                {
-                    if (c < '0' || c > '9')
-                        return false;
-                }
-            else
-                foreach (char c in str)
-                    if (c < '0' || c > '9')
-                        if (c != '.')
-                            return false;
-            return true;
-        }
-
+       
         private void EmptyAll()
         {
             textBox1.Text = "";
@@ -238,11 +178,16 @@ namespace Fitness
             textBox8.Text = "";
         }
 
+        private void textBox23_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter) button2_Click(sender, e);
+        }
+
         private void button7_Click(object sender, EventArgs e)
         {
             if (!String.IsNullOrEmpty(textBox10.Text) && !String.IsNullOrEmpty(textBox9.Text) && !String.IsNullOrEmpty(textBox11.Text) && !String.IsNullOrEmpty(textBox9.Text))
             {
-                if (IsDigitsOnly(textBox9.Text))
+                if (Utilities.IsDigitsOnly(textBox9.Text))
                 {
                     int bi = Convert.ToInt32(textBox9.Text);
                     if (FitnessDB.Korisnici.Count(k => k.BrojIskaznice == bi) == 0)
@@ -250,7 +195,7 @@ namespace Fitness
                         string ime = textBox10.Text;
                         string prezime = textBox11.Text;
                         string rodenje = textBox13.Text;
-                        if (IsDigitsOnly(rodenje, true))
+                        if (Utilities.IsDigitsOnly(rodenje, true))
                         {
                             if (FitnessDB.Korisnici.Count(k => k.Ime == ime && k.Prezime == prezime && k.DatumRodenja == rodenje) == 0)
                             {
@@ -266,6 +211,7 @@ namespace Fitness
                                 novi.AktivnaUsluga = "nema aktivne usluge";
                                 novi.AktivnaOd = "";
                                 novi.AktivnaDo = "";
+                                novi.Dolazaka = 0;
                                 FitnessDB.Korisnici.Add(novi);
                                 MessageBox.Show("Korisnik uspješno dodan!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 FitnessDB.Korisnici.Load();
@@ -287,7 +233,7 @@ namespace Fitness
 
         private void button4_Click(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(textBox1.Text) && IsDigitsOnly(textBox1.Text))
+            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
             {
                 Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == Convert.ToInt32(textBox1.Text));
                 k.Napomena = richTextBox1.Text;
@@ -298,7 +244,7 @@ namespace Fitness
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(textBox1.Text) && IsDigitsOnly(textBox1.Text))
+            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
             {
                 textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
                 if (loaded == true)
@@ -319,7 +265,20 @@ namespace Fitness
                     {
                         if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
                         {
-                            //TODO: smanjiti broj preostalih dolazaka u slučaju usluge sa ograničenim brojem dolazaka
+                            int bi = Convert.ToInt32(textBox1.Text);
+                            Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                            if (k.AktivnaUsluga == "TERETANA 12 DOLAZAKA" || k.AktivnaUsluga == "GRUPNI TRENINZI 2X TJEDNO" || k.AktivnaUsluga == "POJEDINAČNI TRENING")
+                            {
+                                if (k.Dolazaka > 0)
+                                    k.Dolazaka -= 1;
+                                else
+                                {
+                                    MessageBox.Show("Korisnik je iskoristio sve dolaske!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                    goto label;
+                                }
+
+                            }
+
                             listBox1.Items.Add(item);
                             string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
                             Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
@@ -328,15 +287,14 @@ namespace Fitness
                                 d.BrojDolazaka += 1;
                                 FitnessDB.Dolasci.Update(d);
                             }
-
-                            int bi = Convert.ToInt32(textBox1.Text);
-                            Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
                             k.ZadnjiDolazak = danas + " u " + DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
                             FitnessDB.Korisnici.Update(k);
+                            goto label;
                         }
                         else MessageBox.Show("Korisnik nema aktivnu uslugu!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
 
+                label:
                     System.Threading.Thread.Sleep(100);
                     loaded = false;
                     EmptyAll();
@@ -362,7 +320,7 @@ namespace Fitness
 
         private void button5_Click(object sender, EventArgs e)
         {
-            if(loaded)
+            if (loaded)
             {
                 if (!usluga)
                 {
@@ -372,32 +330,35 @@ namespace Fitness
                 }
                 else if (usluga)
                 {
-                    if(!String.IsNullOrEmpty(textBox1.Text) && IsDigitsOnly(textBox1.Text))
+                    if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                     {
                         string u = comboBox1.SelectedItem.ToString();
                         int bi = Convert.ToInt32(textBox1.Text);
                         Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
-                        if(k.Index > 0)
+                        if (k.Index > 0)
                         {
                             k.AktivnaUsluga = u;
+                            if (u == "TERETANA 12 DOLAZAKA") k.Dolazaka = 12;
+                            if (u == "GRUPNI TRENINZI 2X TJEDNO") k.Dolazaka = 8;
+                            if (u == "POJEDINAČNI TRENING") k.Dolazaka = 1;
                             int dan = DateTime.Now.Day;
                             int mjesec = DateTime.Now.Month;
                             int godina = DateTime.Now.Year;
-                            int ovaj_mjesec = GetDaysInMonth(mjesec, godina);
+                            int ovaj_mjesec = Utilities.GetDaysInMonth(mjesec, godina);
                             k.AktivnaOd = dan + "." + mjesec + "." + godina;
-                            if(mjesec + 1 > 12)
+                            if (mjesec + 1 > 12)
                             {
                                 mjesec = 0;
                                 godina += 1;
                             }
-                            int slj_mjesec = GetDaysInMonth(mjesec+1, godina);
+                            int slj_mjesec = Utilities.GetDaysInMonth(mjesec + 1, godina);
                             int razlika = ovaj_mjesec - slj_mjesec;
                             if (razlika > 0)
                             {
                                 dan = razlika;
                                 mjesec += 1;
                             }
-                            k.AktivnaDo = dan + "." + (mjesec+1).ToString() + "." + godina;
+                            k.AktivnaDo = dan + "." + (mjesec + 1).ToString() + "." + godina;
                             FitnessDB.Korisnici.Update(k);
                             comboBox1.Enabled = false;
                             button5.Text = "Promijeni";
@@ -427,22 +388,22 @@ namespace Fitness
                     else if (produlji)
                     {
                         string datum = textBox8.Text;
-                        if (IsDigitsOnly(datum, true))
+                        if (Utilities.IsDigitsOnly(datum, true))
                         {
-                            if (!String.IsNullOrEmpty(textBox1.Text) && IsDigitsOnly(textBox1.Text))
+                            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                             {
                                 int bi = Convert.ToInt32(textBox1.Text);
                                 Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
                                 k.AktivnaDo = datum;
                                 FitnessDB.Korisnici.Update(k);
                                 textBox8.ReadOnly = true;
-                                button6.Text = "Produlji";
+                                button6.Text = "Promijeni";
                                 produlji = false;
                                 MessageBox.Show("Usluga uspješno produljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                             else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
-                        else MessageBox.Show("Datum rođenja striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        else MessageBox.Show("Datum striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
             }
@@ -492,6 +453,61 @@ namespace Fitness
                 }
 
                 EmptyAll();
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (loaded)
+            {
+                if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
+                {
+                    if (!promijeni)
+                    {
+                        textBox7.ReadOnly = false;
+                        button3.Text = "Spremi";
+                        promijeni = true;
+                    }
+                    else if (promijeni)
+                    {
+                        string datum = textBox7.Text;
+                        if (Utilities.IsDigitsOnly(datum, true))
+                        {
+                            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                            {
+                                int bi = Convert.ToInt32(textBox1.Text);
+                                Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                                k.AktivnaOd = datum;
+                                FitnessDB.Korisnici.Update(k);
+                                textBox7.ReadOnly = true;
+                                button3.Text = "Promijeni";
+                                promijeni = false;
+                                MessageBox.Show("Promijenjeno!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                            else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        else MessageBox.Show("Datum striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+            }
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+            if (loaded)
+            {
+                string usluga = comboBox1.Text.ToString();
+                if (usluga == "TERETANA 12 DOLAZAKA" || usluga == "GRUPNI TRENINZI 2X TJEDNO" || usluga == "POJEDINAČNI TRENING")
+                {
+                    if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                    {
+                        int bi = Convert.ToInt32(textBox1.Text);
+                        Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                        if (k.Index > 0)
+                            MessageBox.Show("Preostalo dolazaka za uslugu '" + usluga + "':\t" + k.Dolazaka.ToString(), "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
         }
     }

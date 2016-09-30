@@ -32,5 +32,6 @@ namespace Fitness.Database
         public string AktivnaUsluga;
         public string AktivnaOd;
         public string AktivnaDo;
+        public int Dolazaka;
     }
 }
