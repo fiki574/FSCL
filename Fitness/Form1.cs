@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+//#define DUMP_CSV_TO_SQL
+
 using System;
 using System.Windows.Forms;
 using System.Data.SQLite;
@@ -27,6 +29,8 @@ namespace Fitness
 {
     public partial class Form1 : Form
     {
+
+
         public static SQLiteConnection m_dbConnection;
         public static bool loaded;
         public static bool usluga;
@@ -99,6 +103,10 @@ namespace Fitness
                 MessageBox.Show(ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
+
+            #if DUMP_CSV_TO_SQL
+            Utilities.ExportFromCsvToSql("dump.csv");
+            #endif
         }
 
         private void OnClick(object sender, EventArgs e)

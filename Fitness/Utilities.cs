@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fitness
+﻿namespace Fitness
 {
     public class Utilities
     {
@@ -73,5 +67,49 @@ namespace Fitness
                             return false;
             return true;
         }
+
+        public static void ExportFromCsvToSql(string f)
+        {
+            AllocConsole();
+            System.Threading.Thread.Sleep(500);
+            try
+            {
+                System.IO.StreamReader file = new System.IO.StreamReader(f, System.Text.Encoding.Default);
+                string line;
+                while ((line = file.ReadLine()) != null)
+                {
+                    string[] data = line.Split(new char[] { ';' });
+                    int bi = System.Convert.ToInt32(data[0]);
+                    string[] iip = data[1].Split(new char[] { ' ' });
+                    string ime = iip[0], prezime = null;
+                    if (iip.Length == 2) prezime = iip[1];
+                    else if (iip.Length == 3) prezime = iip[1] + " " + iip[2];
+
+                    Database.Korisnik k = new Database.Korisnik();
+                    k.Index = Database.FitnessDB.Korisnici.GenerateIndex();
+                    k.BrojIskaznice = bi;
+                    k.Ime = ime;
+                    k.Prezime = prezime;
+                    k.DatumUclanjenja = "";
+                    k.DatumRodenja = "";
+                    k.ZadnjiDolazak = "nepoznato";
+                    k.Napomena = "";
+                    k.AktivnaUsluga = "nema aktivne usluge";
+                    k.AktivnaOd = "";
+                    k.AktivnaDo = "";
+                    k.Dolazaka = 0;
+                    Database.FitnessDB.Korisnici.Add(k);
+                    System.Console.WriteLine(bi + " " + ime + " " + prezime);
+                }
+                Database.FitnessDB.Korisnici.Load();
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine("\n\n" + ex.ToString() + "\n\n");
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern bool AllocConsole();
     }
 }
