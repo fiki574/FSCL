@@ -27,8 +27,6 @@ namespace Fitness
 {
     public partial class Form1 : Form
     {
-
-
         public static SQLiteConnection m_dbConnection;
         public static bool loaded;
         public static bool usluga;
