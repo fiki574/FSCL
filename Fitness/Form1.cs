@@ -16,8 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//#define DUMP_CSV_TO_SQL
-
 using System;
 using System.Windows.Forms;
 using System.Data.SQLite;
@@ -39,7 +37,7 @@ namespace Fitness
 
         private ContextMenuStrip listboxContextMenu;
 
-        public Form1()
+        public Form1(bool dump)
         {
             InitializeComponent();
 
@@ -104,9 +102,9 @@ namespace Fitness
                 Environment.Exit(0);
             }
 
-            #if DUMP_CSV_TO_SQL
-            Utilities.ExportFromCsvToSql("dump.csv");
-            #endif
+            if(dump)
+                if(File.Exists("dump.csv"))
+                    Utilities.ExportFromCsvToSql("dump.csv");
         }
 
         private void OnClick(object sender, EventArgs e)

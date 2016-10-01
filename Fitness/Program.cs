@@ -24,11 +24,11 @@ namespace Fitness
     static class Program
     {
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Form1(args.Length == 1 ? (args[0] == "dump" ? true : false) : false));
         }
     }
 }
