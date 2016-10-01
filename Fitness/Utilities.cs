@@ -85,6 +85,12 @@
                     if (iip.Length == 2) prezime = iip[1];
                     else if (iip.Length == 3) prezime = iip[1] + " " + iip[2];
 
+                    if (Database.FitnessDB.Korisnici.Count(ko => ko.BrojIskaznice == bi) > 0)
+                    {
+                        System.Console.WriteLine("Korisnik sa brojem iskaznice '" + bi + "' već postoji.");
+                        continue;
+                    }
+
                     Database.Korisnik k = new Database.Korisnik();
                     k.Index = Database.FitnessDB.Korisnici.GenerateIndex();
                     k.BrojIskaznice = bi;
