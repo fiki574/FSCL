@@ -417,11 +417,11 @@ namespace Fitness
         {
             if (!loaded)
             {
-                string ime = textBox2.Text;
-                string prezime = textBox3.Text;
+                string ime = textBox2.Text.ToLowerInvariant();
+                string prezime = textBox3.Text.ToLowerInvariant();
                 if (String.IsNullOrEmpty(ime) && !String.IsNullOrEmpty(prezime))
                 {
-                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Prezime == prezime);
+                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Prezime.ToLowerInvariant() == prezime);
                     if (ks.Count > 0)
                     {
                         string korisnici = null;
@@ -433,7 +433,7 @@ namespace Fitness
                 }
                 else if (!String.IsNullOrEmpty(ime) && String.IsNullOrEmpty(prezime))
                 {
-                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime == ime);
+                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime.ToLowerInvariant() == ime);
                     if (ks.Count > 0)
                     {
                         string korisnici = null;
@@ -445,7 +445,7 @@ namespace Fitness
                 }
                 else
                 {
-                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime == ime && ko.Prezime == prezime);
+                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime.ToLowerInvariant() == ime && ko.Prezime.ToLowerInvariant() == prezime);
                     if (ks.Count > 0)
                     {
                         string korisnici = null;
