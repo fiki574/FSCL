@@ -345,24 +345,10 @@ namespace Fitness
                             if (u == "TERETANA 12 DOLAZAKA") k.Dolazaka = 12;
                             if (u == "GRUPNI TRENINZI 2X TJEDNO") k.Dolazaka = 8;
                             if (u == "POJEDINAČNI TRENING") k.Dolazaka = 1;
-                            int dan = DateTime.Now.Day;
-                            int mjesec = DateTime.Now.Month;
-                            int godina = DateTime.Now.Year;
-                            int ovaj_mjesec = Utilities.GetDaysInMonth(mjesec, godina);
-                            k.AktivnaOd = dan + "." + mjesec + "." + godina;
-                            if (mjesec + 1 > 12)
-                            {
-                                mjesec = 0;
-                                godina += 1;
-                            }
-                            int slj_mjesec = Utilities.GetDaysInMonth(mjesec + 1, godina);
-                            int razlika = ovaj_mjesec - slj_mjesec;
-                            if (razlika > 0)
-                            {
-                                dan = razlika;
-                                mjesec += 1;
-                            }
-                            k.AktivnaDo = dan + "." + (mjesec + 1).ToString() + "." + godina;
+                            DateTime dt1 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                            k.AktivnaOd = dt1.Day + "." + dt1.Month + "." + dt1.Year;
+                            DateTime dt2 = dt1.AddMonths(1);
+                            k.AktivnaDo = dt2.Day + "." + dt2.Month + "." + dt2.Year;
                             FitnessDB.Korisnici.Update(k);
                             comboBox1.Enabled = false;
                             button5.Text = "Promijeni";
