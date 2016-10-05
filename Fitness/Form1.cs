@@ -201,13 +201,13 @@ namespace Fitness
                         string rodenje = textBox13.Text;
                         if (Utilities.IsDigitsOnly(rodenje, true))
                         {
-                            if (FitnessDB.Korisnici.Count(k => k.Ime == ime && k.Prezime == prezime && k.DatumRodenja == rodenje) == 0)
+                            if (FitnessDB.Korisnici.Count(k => k.Ime.ToLowerInvariant() == ime.ToLowerInvariant() && k.Prezime.ToLowerInvariant() == prezime.ToLowerInvariant() && k.DatumRodenja == rodenje) == 0)
                             {
                                 Korisnik novi = new Korisnik();
                                 novi.Index = FitnessDB.Korisnici.GenerateIndex();
                                 novi.BrojIskaznice = bi;
-                                novi.Ime = ime;
-                                novi.Prezime = prezime;
+                                novi.Ime = ime.ToUpperInvariant();
+                                novi.Prezime = prezime.ToUpperInvariant();
                                 novi.DatumUclanjenja = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
                                 novi.DatumRodenja = rodenje;
                                 novi.ZadnjiDolazak = "nepoznato";
