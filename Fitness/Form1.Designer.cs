@@ -35,6 +35,7 @@ namespace Fitness
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button3 = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.textBox12 = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
@@ -76,7 +77,6 @@ namespace Fitness
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
-            this.button3 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -89,7 +89,6 @@ namespace Fitness
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Controls.Add(this.textBox12);
             this.groupBox1.Controls.Add(this.label14);
-            this.groupBox1.Controls.Add(this.groupBox4);
             this.groupBox1.Controls.Add(this.groupBox3);
             this.groupBox1.Controls.Add(this.button6);
             this.groupBox1.Controls.Add(this.button5);
@@ -115,10 +114,20 @@ namespace Fitness
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(479, 800);
+            this.groupBox1.Size = new System.Drawing.Size(479, 732);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Član";
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(353, 469);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(110, 30);
+            this.button3.TabIndex = 29;
+            this.button3.Text = "Promijeni";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // comboBox1
             // 
@@ -150,18 +159,18 @@ namespace Fitness
             this.groupBox4.Controls.Add(this.button8);
             this.groupBox4.Controls.Add(this.dateTimePicker1);
             this.groupBox4.Controls.Add(this.label13);
-            this.groupBox4.Location = new System.Drawing.Point(9, 727);
+            this.groupBox4.Location = new System.Drawing.Point(20, 648);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(454, 67);
+            this.groupBox4.Size = new System.Drawing.Size(568, 73);
             this.groupBox4.TabIndex = 25;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Evidencija ukupnih dnevnih dolazaka:";
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(338, 22);
+            this.button8.Location = new System.Drawing.Point(424, 22);
             this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(110, 30);
+            this.button8.Size = new System.Drawing.Size(138, 30);
             this.button8.TabIndex = 2;
             this.button8.Text = "Prikaži";
             this.button8.UseVisualStyleBackColor = true;
@@ -169,9 +178,9 @@ namespace Fitness
             // 
             // dateTimePicker1
             // 
-            this.dateTimePicker1.Location = new System.Drawing.Point(111, 24);
+            this.dateTimePicker1.Location = new System.Drawing.Point(102, 24);
             this.dateTimePicker1.Name = "dateTimePicker1";
-            this.dateTimePicker1.Size = new System.Drawing.Size(213, 22);
+            this.dateTimePicker1.Size = new System.Drawing.Size(285, 22);
             this.dateTimePicker1.TabIndex = 1;
             // 
             // label13
@@ -471,9 +480,10 @@ namespace Fitness
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.listBox1);
+            this.groupBox2.Controls.Add(this.groupBox4);
             this.groupBox2.Location = new System.Drawing.Point(516, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(615, 800);
+            this.groupBox2.Size = new System.Drawing.Size(615, 732);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Prisutni članovi:";
@@ -484,24 +494,14 @@ namespace Fitness
             this.listBox1.ItemHeight = 16;
             this.listBox1.Location = new System.Drawing.Point(20, 21);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(568, 772);
+            this.listBox1.Size = new System.Drawing.Size(568, 612);
             this.listBox1.TabIndex = 0;
-            // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(353, 469);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(110, 30);
-            this.button3.TabIndex = 29;
-            this.button3.Text = "Promijeni";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1151, 875);
+            this.ClientSize = new System.Drawing.Size(1151, 796);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
