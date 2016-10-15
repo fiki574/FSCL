@@ -74,12 +74,8 @@ namespace Fitness
             try
             {
                 if (!File.Exists("fitness.sqlite"))
-                {
                     SQLiteConnection.CreateFile("fitness.sqlite");
-                    FitnessDB.Load();
-                }
-                else
-                    FitnessDB.Load();
+                FitnessDB.Load();
 
                 string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
                 Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
@@ -90,8 +86,7 @@ namespace Fitness
                     dol.Datum = danas;
                     dol.BrojDolazaka = 0;
                     FitnessDB.Dolasci.Add(dol);
-                    if (!File.Exists("fitness_backup.sqlite"))
-                        File.Copy("fitness.sqlite", "fitness_backup.sqlite");
+                    Utilities.CreateBackup();
                 }
             }
             catch (Exception ex)
@@ -255,14 +250,16 @@ namespace Fitness
                 {
                     System.Threading.Thread.Sleep(100);
                     string vrijeme = DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
-                    string item = textBox1.Text + "\t" + textBox2.Text + " " + textBox3.Text + "\t" + vrijeme + "\t\t" + comboBox1.SelectedItem.ToString();
+                    string item = textBox1.Text + "\t" + textBox2.Text + " " + textBox3.Text + "\t" + vrijeme + "\t" + comboBox1.SelectedItem.ToString();
                     bool contains = false;
                     foreach (var i in listBox1.Items)
                     {
-                        if (i.ToString().Contains(textBox2.Text) && i.ToString().Contains(textBox3.Text))
+                        string[] it = i.ToString().Split(new char[] { '\t' });
+                        if (it[0] == textBox1.Text)
+                        {
                             contains = true;
-                        else
-                            continue;
+                            break;
+                        } 
                     }
 
                     if (!contains)
@@ -280,7 +277,6 @@ namespace Fitness
                                     MessageBox.Show("Korisnik je iskoristio sve dolaske!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                                     goto label;
                                 }
-
                             }
 
                             listBox1.Items.Add(item);
@@ -297,8 +293,9 @@ namespace Fitness
                         }
                         else MessageBox.Show("Korisnik nema aktivnu uslugu!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
+                    else MessageBox.Show("Korisnik je već prisutan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-                label:
+                    label:
                     System.Threading.Thread.Sleep(100);
                     loaded = false;
                     EmptyAll();

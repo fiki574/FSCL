@@ -68,6 +68,17 @@
             return true;
         }
 
+        public static void CreateBackup()
+        {
+            if (!System.IO.File.Exists("fitness_backup.sqlite"))
+                System.IO.File.Copy("fitness.sqlite", "fitness_backup.sqlite");
+            else
+            {
+                System.IO.File.Delete("fitness_backup.sqlite");
+                System.IO.File.Copy("fitness.sqlite", "fitness_backup.sqlite");
+            }
+        }
+
         public static void ExportFromCsvToSql(string f)
         {
             AllocConsole();
