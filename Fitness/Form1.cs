@@ -129,6 +129,7 @@ namespace Fitness
                             TimeSpan diff = dt - DateTime.Today;
                             if (diff.Days < 0)
                             {
+                                k.Napomena += "\n\nZadnja usluga: " + k.AktivnaUsluga;
                                 k.AktivnaUsluga = "nema aktivne usluge";
                                 k.AktivnaOd = "";
                                 k.AktivnaDo = "";
