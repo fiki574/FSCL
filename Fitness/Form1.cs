@@ -50,7 +50,9 @@ namespace Fitness
 
             listboxContextMenu = new ContextMenuStrip();
             listboxContextMenu.Items.Add("Odlazak");
-            listboxContextMenu.Click += new EventHandler(OnClick);
+            listboxContextMenu.Items.Add("Prikaži korisničke podatke");
+            listboxContextMenu.Items[0].Click += new EventHandler(OnClick);
+            listboxContextMenu.Items[1].Click += new EventHandler(OnClick2);
             listBox1.ContextMenuStrip = listboxContextMenu;
 
             comboBox1.Items.Add("nema aktivne usluge");
@@ -95,407 +97,623 @@ namespace Fitness
                 Environment.Exit(0);
             }
 
-            if(dump)
-                if(File.Exists("dump.csv"))
+            if (dump)
+                if (File.Exists("dump.csv"))
                     Utilities.ExportFromCsvToSql("dump.csv");
         }
 
         private void OnClick(object sender, EventArgs e)
         {
-            if (listBox1.SelectedItem != null)
-                listBox1.Items.Remove(listBox1.SelectedItem);
+            try
+            {
+                if (listBox1.SelectedItem != null)
+                    listBox1.Items.Remove(listBox1.SelectedItem);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
+        }
+
+        private void OnClick2(object sender, EventArgs e)
+        {
+            try
+            {
+                if (listBox1.SelectedItem != null)
+                {
+                    string user = listBox1.SelectedItem.ToString();
+                    string[] split = user.Split('\t');
+                    textBox1.Text = split[0];
+                    textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
         }
 
         private static void OnTimedEvent(object source, System.Timers.ElapsedEventArgs e)
         {
-            FitnessDB.Korisnici.Load();
-            FitnessDB.Dolasci.Load();
+            try
+            {
+                FitnessDB.Korisnici.Load();
+                FitnessDB.Dolasci.Load();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter)
+            try
             {
-                if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                if (e.KeyCode == Keys.Enter)
                 {
-                    int bi = Convert.ToInt32(textBox1.Text);
-                    Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
-                    if (k.Index > 0)
+                    if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                     {
-                        if (k.AktivnaUsluga != "nema aktivne usluge")
+                        int bi = Convert.ToInt32(textBox1.Text);
+                        Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                        if (k.Index > 0)
                         {
-                            string[] date = k.AktivnaDo.Split(new char[] { '.' });
-                            DateTime dt = new DateTime(Convert.ToInt32(date[2]), Convert.ToInt32(date[1]), Convert.ToInt32(date[0]));
-                            TimeSpan diff = dt - DateTime.Today;
-                            if (diff.Days < 0)
+                            if (k.AktivnaUsluga != "nema aktivne usluge")
                             {
-                                k.Napomena += "\n\nZadnja usluga: " + k.AktivnaUsluga;
-                                k.AktivnaUsluga = "nema aktivne usluge";
-                                k.AktivnaOd = "";
-                                k.AktivnaDo = "";
-                                FitnessDB.Korisnici.Update(k);
+                                string[] date = k.AktivnaDo.Split(new char[] { '.' });
+                                DateTime dt = new DateTime(Convert.ToInt32(date[2]), Convert.ToInt32(date[1]), Convert.ToInt32(date[0]));
+                                TimeSpan diff = dt - DateTime.Today;
+                                if (diff.Days < 0)
+                                {
+                                    k.Napomena += $"\nZadnja usluga ({Convert.ToInt32(date[1])}/{Convert.ToInt32(date[2])}): {k.AktivnaUsluga}";
+                                    k.AktivnaUsluga = "nema aktivne usluge";
+                                    k.AktivnaOd = "";
+                                    k.AktivnaDo = "";
+                                    FitnessDB.Korisnici.Update(k);
+                                }
                             }
-                        }
 
-                        textBox2.Text = k.Ime;
-                        textBox3.Text = k.Prezime;
-                        textBox4.Text = k.DatumUclanjenja;
-                        textBox12.Text = k.DatumRodenja;
-                        richTextBox1.Text = k.Napomena;
-                        textBox5.Text = k.ZadnjiDolazak;
-                        comboBox1.SelectedIndex = Utilities.UslugaToIndex(k.AktivnaUsluga);
-                        textBox7.Text = k.AktivnaOd;
-                        textBox8.Text = k.AktivnaDo;
-                        loaded = true;
+                            textBox2.Text = k.Ime;
+                            textBox3.Text = k.Prezime;
+                            textBox4.Text = k.DatumUclanjenja;
+                            textBox12.Text = k.DatumRodenja;
+                            richTextBox1.Text = k.Napomena;
+                            textBox5.Text = k.ZadnjiDolazak;
+                            comboBox1.SelectedIndex = Utilities.UslugaToIndex(k.AktivnaUsluga);
+                            textBox7.Text = k.AktivnaOd;
+                            textBox8.Text = k.AktivnaDo;
+                            loaded = true;
+                        }
+                        else
+                        {
+                            loaded = false;
+                            EmptyAll();
+                            MessageBox.Show("Korisnik ne postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
                     else
                     {
-                        loaded = false;
                         EmptyAll();
-                        MessageBox.Show("Korisnik ne postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        loaded = false;
                     }
                 }
-                else
-                {
-                    EmptyAll();
-                    loaded = false;
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-       
         private void EmptyAll()
         {
-            textBox1.Text = "";
-            textBox2.Text = "";
-            textBox3.Text = "";
-            textBox4.Text = "";
-            textBox12.Text = "";
-            richTextBox1.Text = "";
-            textBox5.Text = "";
-            comboBox1.SelectedIndex = -1;
-            textBox7.Text = "";
-            textBox8.Text = "";
+            try
+            {
+                textBox1.Text = "";
+                textBox2.Text = "";
+                textBox3.Text = "";
+                textBox4.Text = "";
+                textBox12.Text = "";
+                richTextBox1.Text = "";
+                textBox5.Text = "";
+                comboBox1.SelectedIndex = -1;
+                textBox7.Text = "";
+                textBox8.Text = "";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
         }
 
         private void textBox23_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter) button2_Click(sender, e);
+            try
+            {
+                if (e.KeyCode == Keys.Enter)
+                    button2_Click(sender, e);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(textBox10.Text) && !String.IsNullOrEmpty(textBox9.Text) && !String.IsNullOrEmpty(textBox11.Text) && !String.IsNullOrEmpty(textBox9.Text))
+            try
             {
-                if (Utilities.IsDigitsOnly(textBox9.Text))
+                if (!string.IsNullOrEmpty(textBox10.Text) && !string.IsNullOrEmpty(textBox9.Text) && !string.IsNullOrEmpty(textBox11.Text) && !string.IsNullOrEmpty(textBox9.Text))
                 {
-                    int bi = Convert.ToInt32(textBox9.Text);
-                    if (FitnessDB.Korisnici.Count(k => k.BrojIskaznice == bi) == 0)
+                    if (Utilities.IsDigitsOnly(textBox9.Text))
                     {
-                        string ime = textBox10.Text;
-                        string prezime = textBox11.Text;
-                        string rodenje = textBox13.Text;
-                        if (Utilities.IsDigitsOnly(rodenje, true))
+                        int bi = Convert.ToInt32(textBox9.Text);
+                        if (FitnessDB.Korisnici.Count(k => k.BrojIskaznice == bi) == 0)
                         {
-                            if (FitnessDB.Korisnici.Count(k => k.Ime.ToLowerInvariant() == ime.ToLowerInvariant() && k.Prezime.ToLowerInvariant() == prezime.ToLowerInvariant() && k.DatumRodenja == rodenje) == 0)
+                            string ime = textBox10.Text;
+                            string prezime = textBox11.Text;
+                            string rodenje = textBox13.Text;
+                            if (Utilities.IsDigitsOnly(rodenje, true))
                             {
-                                Korisnik novi = new Korisnik();
-                                novi.Index = FitnessDB.Korisnici.GenerateIndex();
-                                novi.BrojIskaznice = bi;
-                                novi.Ime = ime.ToUpperInvariant();
-                                novi.Prezime = prezime.ToUpperInvariant();
-                                novi.DatumUclanjenja = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
-                                novi.DatumRodenja = rodenje;
-                                novi.ZadnjiDolazak = "nepoznato";
-                                novi.Napomena = "";
-                                novi.AktivnaUsluga = "nema aktivne usluge";
-                                novi.AktivnaOd = "";
-                                novi.AktivnaDo = "";
-                                novi.Dolazaka = 0;
-                                FitnessDB.Korisnici.Add(novi);
-                                MessageBox.Show("Korisnik uspješno dodan!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                FitnessDB.Korisnici.Load();
-                                textBox9.Text = "";
-                                textBox10.Text = "";
-                                textBox11.Text = "";
-                                textBox13.Text = "";
+                                if (FitnessDB.Korisnici.Count(k => k.Ime.ToLowerInvariant() == ime.ToLowerInvariant() && k.Prezime.ToLowerInvariant() == prezime.ToLowerInvariant() && k.DatumRodenja == rodenje) == 0)
+                                {
+                                    Korisnik novi = new Korisnik();
+                                    novi.Index = FitnessDB.Korisnici.GenerateIndex();
+                                    novi.BrojIskaznice = bi;
+                                    novi.Ime = ime.ToUpperInvariant();
+                                    novi.Prezime = prezime.ToUpperInvariant();
+                                    novi.DatumUclanjenja = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
+                                    novi.DatumRodenja = rodenje;
+                                    novi.ZadnjiDolazak = "nepoznato";
+                                    novi.Napomena = "";
+                                    novi.AktivnaUsluga = "nema aktivne usluge";
+                                    novi.AktivnaOd = "";
+                                    novi.AktivnaDo = "";
+                                    novi.Dolazaka = 0;
+                                    FitnessDB.Korisnici.Add(novi);
+                                    MessageBox.Show("Korisnik uspješno dodan!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    FitnessDB.Korisnici.Load();
+                                    textBox9.Text = "";
+                                    textBox10.Text = "";
+                                    textBox11.Text = "";
+                                    textBox13.Text = "";
+                                }
+                                else MessageBox.Show("Član sa danim detaljima već postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
-                            else MessageBox.Show("Član sa danim detaljima već postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            else MessageBox.Show("Datum rođenja striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
-                        else MessageBox.Show("Datum rođenja striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        else MessageBox.Show("Član sa odabranim brojem iskaznice već postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
-                    else MessageBox.Show("Član sa odabranim brojem iskaznice već postoji!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    else MessageBox.Show("Broj iskaznice striktno mora biti numerički!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
-                else MessageBox.Show("Broj iskaznice striktno mora biti numerički!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                else MessageBox.Show("Neka polja su prazna!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-            else MessageBox.Show("Neka polja su prazna!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+            try
             {
-                Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == Convert.ToInt32(textBox1.Text));
-                k.Napomena = richTextBox1.Text;
-                FitnessDB.Korisnici.Update(k);
-                MessageBox.Show("Napomena uspješno spremljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                {
+                    Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == Convert.ToInt32(textBox1.Text));
+                    k.Napomena = richTextBox1.Text;
+                    FitnessDB.Korisnici.Update(k);
+                    MessageBox.Show("Napomena uspješno spremljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+            try
             {
-                textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
-                if (loaded == true)
+                if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                 {
-                    System.Threading.Thread.Sleep(100);
-                    string vrijeme = DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
-                    string item = textBox1.Text + "\t" + textBox2.Text + " " + textBox3.Text + "\t" + vrijeme + "\t" + comboBox1.SelectedItem.ToString();
-                    bool contains = false;
-                    foreach (var i in listBox1.Items)
+                    textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                    if (loaded == true)
                     {
-                        string[] it = i.ToString().Split(new char[] { '\t' });
-                        if (it[0] == textBox1.Text)
+                        System.Threading.Thread.Sleep(100);
+                        string vrijeme = DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
+                        string item = textBox1.Text + "\t\t" + vrijeme + "\t\t" + comboBox1.SelectedItem.ToString();
+                        bool contains = false;
+                        foreach (var i in listBox1.Items)
                         {
-                            contains = true;
-                            break;
-                        } 
-                    }
-
-                    if (!contains)
-                    {
-                        if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
-                        {
-                            int bi = Convert.ToInt32(textBox1.Text);
-                            Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
-                            if (k.AktivnaUsluga == "TERETANA 12 DOLAZAKA" || k.AktivnaUsluga == "GRUPNI TRENINZI 2X TJEDNO" || k.AktivnaUsluga == "POJEDINAČNI TRENING")
+                            string[] it = i.ToString().Split(new char[] { '\t' });
+                            if (it[0] == textBox1.Text)
                             {
-                                if (k.Dolazaka > 0)
-                                    k.Dolazaka -= 1;
-                                else
-                                {
-                                    MessageBox.Show("Korisnik je iskoristio sve dolaske!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                                    goto label;
-                                }
+                                contains = true;
+                                break;
                             }
-
-                            listBox1.Items.Add(item);
-                            string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
-                            Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
-                            if (d.Index > 0)
-                            {
-                                d.BrojDolazaka += 1;
-                                FitnessDB.Dolasci.Update(d);
-                            }
-                            k.ZadnjiDolazak = danas + " u " + DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
-                            FitnessDB.Korisnici.Update(k);
-                            goto label;
                         }
-                        else MessageBox.Show("Korisnik nema aktivnu uslugu!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    }
-                    else MessageBox.Show("Korisnik je već prisutan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
-                    label:
-                    System.Threading.Thread.Sleep(100);
-                    loaded = false;
-                    EmptyAll();
+                        if (!contains)
+                        {
+                            if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
+                            {
+                                int bi = Convert.ToInt32(textBox1.Text);
+                                Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                                if (k.AktivnaUsluga == "TERETANA 12 DOLAZAKA" || k.AktivnaUsluga == "GRUPNI TRENINZI 2X TJEDNO" || k.AktivnaUsluga == "POJEDINAČNI TRENING")
+                                {
+                                    if (k.Dolazaka > 0)
+                                        k.Dolazaka -= 1;
+                                    else
+                                    {
+                                        MessageBox.Show("Korisnik je iskoristio sve dolaske!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                        goto label;
+                                    }
+                                }
+
+                                listBox1.Items.Add(item);
+                                string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
+                                Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
+                                if (d.Index > 0)
+                                {
+                                    d.BrojDolazaka += 1;
+                                    FitnessDB.Dolasci.Update(d);
+                                }
+                                k.ZadnjiDolazak = danas + " u " + DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
+                                FitnessDB.Korisnici.Update(k);
+                                goto label;
+                            }
+                            else MessageBox.Show("Korisnik nema aktivnu uslugu!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        else MessageBox.Show("Korisnik je već prisutan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                        label:
+                        System.Threading.Thread.Sleep(100);
+                        loaded = false;
+                        EmptyAll();
+                    }
+                    else
+                    {
+                        loaded = false;
+                        EmptyAll();
+                    }
                 }
-                else
-                {
-                    loaded = false;
-                    EmptyAll();
-                }
+                else EmptyAll();
             }
-            else EmptyAll();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-            string date = dateTimePicker1.Value.Date.Day + "." + dateTimePicker1.Value.Date.Month + "." + dateTimePicker1.Value.Date.Year;
-            Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
-            if (d.Index > 0)
-                MessageBox.Show("Ukupno dolazaka za datum '" + date + "':\t" + d.BrojDolazaka.ToString(), "DOLASCI", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            else
-                MessageBox.Show("Datum ne postoji u bazi podataka!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            try
+            {
+                int Day = dateTimePicker1.Value.Day;
+                int Month = dateTimePicker1.Value.Month;
+                int Year = dateTimePicker1.Value.Year;
+                string danass = Day + "." + Month + "." + Year;
+                DateTime dt = new DateTime(Year, Month, Day);
+                DateTime now = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                if (dt != now)
+                {
+                    int[] TotalUsersPerDay = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
+                    int[] NumberOfDays = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
+                    string output = null;
+                    Dolasci danas = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danass);
+                    if(danas.Index > 0)
+                        output = "Ukupno dolazaka za datum '" + dt.ToString("dd.MM.yyyy") + "':\t" + danas.BrojDolazaka.ToString();
+
+                    foreach (DateTime o in EachDay(dt, now))
+                    {
+                        string date = o.Day + "." + o.Month + "." + o.Year;
+                        Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
+                        if (d.Index > 0)
+                        {
+                            if (o.DayOfWeek == DayOfWeek.Monday)
+                            {
+                                TotalUsersPerDay[0] += d.BrojDolazaka;
+                                NumberOfDays[0] += 1;
+                            }
+                            else if (o.DayOfWeek == DayOfWeek.Tuesday)
+                            {
+                                TotalUsersPerDay[1] += d.BrojDolazaka;
+                                NumberOfDays[1] += 1;
+                            }
+                            else if (o.DayOfWeek == DayOfWeek.Wednesday)
+                            {
+                                TotalUsersPerDay[2] += d.BrojDolazaka;
+                                NumberOfDays[2] += 1;
+                            }
+                            else if (o.DayOfWeek == DayOfWeek.Thursday)
+                            {
+                                TotalUsersPerDay[3] += d.BrojDolazaka;
+                                NumberOfDays[3] += 1;
+                            }
+                            else if (o.DayOfWeek == DayOfWeek.Friday)
+                            {
+                                TotalUsersPerDay[4] += d.BrojDolazaka;
+                                NumberOfDays[4] += 1;
+                            }
+                            else if (o.DayOfWeek == DayOfWeek.Saturday)
+                            {
+                                TotalUsersPerDay[5] += d.BrojDolazaka;
+                                NumberOfDays[5] += 1;
+                            }
+                            else if (o.DayOfWeek == DayOfWeek.Sunday)
+                            {
+                                TotalUsersPerDay[6] += d.BrojDolazaka;
+                                NumberOfDays[6] += 1;
+                            }
+                        }
+                    }
+
+                    int Ponedjeljak = 0, Utorak = 0, Srijeda = 0, Cetvrtak = 0, Petak = 0, Subota = 0, Nedjelja = 0;
+
+                    if(NumberOfDays[0] != 0)
+                        Ponedjeljak = TotalUsersPerDay[0] / NumberOfDays[0];
+                    if (NumberOfDays[1] != 0)
+                        Utorak = TotalUsersPerDay[1] / NumberOfDays[1];
+                    if (NumberOfDays[2] != 0)
+                        Srijeda = TotalUsersPerDay[2] / NumberOfDays[2];
+                    if (NumberOfDays[3] != 0)
+                        Cetvrtak = TotalUsersPerDay[3] / NumberOfDays[3];
+                    if (NumberOfDays[4] != 0)
+                        Petak = TotalUsersPerDay[4] / NumberOfDays[4];
+                    if (NumberOfDays[5] != 0)
+                        Subota = TotalUsersPerDay[5] / NumberOfDays[5];
+                    if (NumberOfDays[6] != 0)
+                        Nedjelja = TotalUsersPerDay[6] / NumberOfDays[6];
+
+                    output += $"\n\n--\n\nProsječni posjetioci po danima od '{danass}':\n\nPonedjeljak: {Ponedjeljak}\nUtorak: {Utorak}\nSrijeda: {Srijeda}\nČetvrtak: {Cetvrtak}\nPetak: {Petak}\nSubota: {Subota}\nNedjelja: {Nedjelja}";
+                    MessageBox.Show(output, "DOLASCI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    string date = Day + "." + Month + "." + Year;
+                    Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
+                    if (d.Index > 0)
+                        MessageBox.Show("Ukupno dolazaka za datum '" + date + "':\t" + d.BrojDolazaka.ToString(), "DOLASCI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
+            }
+        }
+
+        private IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
+        {
+            for (var day = from.Date; day.Date <= thru.Date; day = day.AddDays(1))
+                yield return day;
         }
 
         private void button5_Click(object sender, EventArgs e)
         {
-            if (loaded)
+            try
             {
-                if (!usluga)
+                if (loaded)
                 {
-                    comboBox1.Enabled = true;
-                    button5.Text = "Spremi";
-                    usluga = true;
-                }
-                else if (usluga)
-                {
-                    if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                    if (!usluga)
                     {
-                        string u = comboBox1.SelectedItem.ToString();
-                        int bi = Convert.ToInt32(textBox1.Text);
-                        Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
-                        if (k.Index > 0)
+                        comboBox1.Enabled = true;
+                        button5.Text = "Spremi";
+                        usluga = true;
+                    }
+                    else if (usluga)
+                    {
+                        if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                         {
-                            k.AktivnaUsluga = u;
-                            if (u == "TERETANA 12 DOLAZAKA") k.Dolazaka = 12;
-                            if (u == "GRUPNI TRENINZI 2X TJEDNO") k.Dolazaka = 8;
-                            if (u == "POJEDINAČNI TRENING") k.Dolazaka = 1;
-                            DateTime dt1 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-                            k.AktivnaOd = dt1.Day + "." + dt1.Month + "." + dt1.Year;
-                            DateTime dt2 = dt1.AddMonths(1);
-                            k.AktivnaDo = dt2.Day + "." + dt2.Month + "." + dt2.Year;
-                            FitnessDB.Korisnici.Update(k);
-                            comboBox1.Enabled = false;
-                            button5.Text = "Promijeni";
-                            usluga = false;
-                            MessageBox.Show("Usluga uspješno promijenjena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            EmptyAll();
-                            textBox1.Text = bi.ToString();
-                            textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                            string u = comboBox1.SelectedItem.ToString();
+                            int bi = Convert.ToInt32(textBox1.Text);
+                            Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                            if (k.Index > 0)
+                            {
+                                k.AktivnaUsluga = u;
+                                if (u == "TERETANA 12 DOLAZAKA") k.Dolazaka = 12;
+                                if (u == "GRUPNI TRENINZI 2X TJEDNO") k.Dolazaka = 8;
+                                if (u == "POJEDINAČNI TRENING") k.Dolazaka = 1;
+                                DateTime dt1 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                                k.AktivnaOd = dt1.Day + "." + dt1.Month + "." + dt1.Year;
+                                DateTime dt2 = dt1.AddMonths(1);
+                                k.AktivnaDo = dt2.Day + "." + dt2.Month + "." + dt2.Year;
+                                FitnessDB.Korisnici.Update(k);
+                                comboBox1.Enabled = false;
+                                button5.Text = "Promijeni";
+                                usluga = false;
+                                MessageBox.Show("Usluga uspješno promijenjena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                EmptyAll();
+                                textBox1.Text = bi.ToString();
+                                textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            if (loaded)
+            try
             {
-                if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
+                if (loaded)
                 {
-                    if (!produlji)
+                    if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
                     {
-                        textBox8.ReadOnly = false;
-                        button6.Text = "Spremi";
-                        produlji = true;
-                    }
-                    else if (produlji)
-                    {
-                        string datum = textBox8.Text;
-                        if (Utilities.IsDigitsOnly(datum, true))
+                        if (!produlji)
                         {
-                            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
-                            {
-                                int bi = Convert.ToInt32(textBox1.Text);
-                                Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
-                                k.AktivnaDo = datum;
-                                FitnessDB.Korisnici.Update(k);
-                                textBox8.ReadOnly = true;
-                                button6.Text = "Promijeni";
-                                produlji = false;
-                                MessageBox.Show("Usluga uspješno produljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                            else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            textBox8.ReadOnly = false;
+                            button6.Text = "Spremi";
+                            produlji = true;
                         }
-                        else MessageBox.Show("Datum striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        else if (produlji)
+                        {
+                            string datum = textBox8.Text;
+                            if (Utilities.IsDigitsOnly(datum, true))
+                            {
+                                if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                                {
+                                    int bi = Convert.ToInt32(textBox1.Text);
+                                    Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                                    k.AktivnaDo = datum;
+                                    FitnessDB.Korisnici.Update(k);
+                                    textBox8.ReadOnly = true;
+                                    button6.Text = "Promijeni";
+                                    produlji = false;
+                                    MessageBox.Show("Usluga uspješno produljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                                else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                            else MessageBox.Show("Datum striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (!loaded)
+            try
             {
-                string ime = textBox2.Text.ToLowerInvariant();
-                string prezime = textBox3.Text.ToLowerInvariant();
-                if (String.IsNullOrEmpty(ime) && !String.IsNullOrEmpty(prezime))
+                if (!loaded)
                 {
-                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Prezime.ToLowerInvariant() == prezime);
-                    if (ks.Count > 0)
+                    string ime = textBox2.Text.ToLowerInvariant();
+                    string prezime = textBox3.Text.ToLowerInvariant();
+                    if (string.IsNullOrEmpty(ime) && !string.IsNullOrEmpty(prezime))
                     {
-                        string korisnici = null;
-                        foreach (Korisnik k in ks)
-                            korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
-                        MessageBox.Show("Korisnici sa prezimenom '" + prezime + "':\n\n" + korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Prezime.ToLowerInvariant() == prezime);
+                        if (ks.Count > 0)
+                        {
+                            string korisnici = null;
+                            foreach (Korisnik k in ks)
+                                korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
+                            MessageBox.Show("Korisnici sa prezimenom '" + prezime + "':\n\n" + korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else MessageBox.Show("Ne postoji korisnik sa tim prezimenom!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
-                    else MessageBox.Show("Ne postoji korisnik sa tim prezimenom!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-                else if (!String.IsNullOrEmpty(ime) && String.IsNullOrEmpty(prezime))
-                {
-                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime.ToLowerInvariant() == ime);
-                    if (ks.Count > 0)
+                    else if (!string.IsNullOrEmpty(ime) && string.IsNullOrEmpty(prezime))
                     {
-                        string korisnici = null;
-                        foreach (Korisnik k in ks)
-                            korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
-                        MessageBox.Show("Korisnici sa imenom '" + ime + "':\n\n" + korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime.ToLowerInvariant() == ime);
+                        if (ks.Count > 0)
+                        {
+                            string korisnici = null;
+                            foreach (Korisnik k in ks)
+                                korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
+                            MessageBox.Show("Korisnici sa imenom '" + ime + "':\n\n" + korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else MessageBox.Show("Ne postoji korisnik sa tim imenom!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
-                    else MessageBox.Show("Ne postoji korisnik sa tim imenom!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-                else
-                {
-                    List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime.ToLowerInvariant() == ime && ko.Prezime.ToLowerInvariant() == prezime);
-                    if (ks.Count > 0)
+                    else
                     {
-                        string korisnici = null;
-                        foreach (Korisnik k in ks)
-                            korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
-                        MessageBox.Show(korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Ime.ToLowerInvariant() == ime && ko.Prezime.ToLowerInvariant() == prezime);
+                        if (ks.Count > 0)
+                        {
+                            string korisnici = null;
+                            foreach (Korisnik k in ks)
+                                korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
+                            MessageBox.Show(korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else MessageBox.Show("Ne postoji korisnik sa tim imenom i prezimenom!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
-                    else MessageBox.Show("Ne postoji korisnik sa tim imenom i prezimenom!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
 
-                EmptyAll();
+                    EmptyAll();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            if (loaded)
+            try
             {
-                if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
+                if (loaded)
                 {
-                    if (!promijeni)
+                    if (comboBox1.SelectedItem.ToString() != "nema aktivne usluge")
                     {
-                        textBox7.ReadOnly = false;
-                        button3.Text = "Spremi";
-                        promijeni = true;
-                    }
-                    else if (promijeni)
-                    {
-                        string datum = textBox7.Text;
-                        if (Utilities.IsDigitsOnly(datum, true))
+                        if (!promijeni)
                         {
-                            if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
-                            {
-                                int bi = Convert.ToInt32(textBox1.Text);
-                                Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
-                                k.AktivnaOd = datum;
-                                FitnessDB.Korisnici.Update(k);
-                                textBox7.ReadOnly = true;
-                                button3.Text = "Promijeni";
-                                promijeni = false;
-                                MessageBox.Show("Promijenjeno!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
-                            else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            textBox7.ReadOnly = false;
+                            button3.Text = "Spremi";
+                            promijeni = true;
                         }
-                        else MessageBox.Show("Datum striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        else if (promijeni)
+                        {
+                            string datum = textBox7.Text;
+                            if (Utilities.IsDigitsOnly(datum, true))
+                            {
+                                if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                                {
+                                    int bi = Convert.ToInt32(textBox1.Text);
+                                    Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                                    k.AktivnaOd = datum;
+                                    FitnessDB.Korisnici.Update(k);
+                                    textBox7.ReadOnly = true;
+                                    button3.Text = "Promijeni";
+                                    promijeni = false;
+                                    MessageBox.Show("Promijenjeno!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                                else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            }
+                            else MessageBox.Show("Datum striktno mora biti numerički i u sljedećem obliku (npr.):\n\n2.2.2016\n27.9.2016", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
         }
 
         private void label7_Click(object sender, EventArgs e)
         {
-            if (loaded)
+            try
             {
-                string usluga = comboBox1.Text.ToString();
-                if (usluga == "TERETANA 12 DOLAZAKA" || usluga == "GRUPNI TRENINZI 2X TJEDNO" || usluga == "POJEDINAČNI TRENING")
+                if (loaded)
                 {
-                    if (!String.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                    string usluga = comboBox1.Text.ToString();
+                    if (usluga == "TERETANA 12 DOLAZAKA" || usluga == "GRUPNI TRENINZI 2X TJEDNO" || usluga == "POJEDINAČNI TRENING")
                     {
-                        int bi = Convert.ToInt32(textBox1.Text);
-                        Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
-                        if (k.Index > 0)
-                            MessageBox.Show("Preostalo dolazaka za uslugu '" + usluga + "':\t" + k.Dolazaka.ToString(), "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                        {
+                            int bi = Convert.ToInt32(textBox1.Text);
+                            Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
+                            if (k.Index > 0)
+                                MessageBox.Show("Preostalo dolazaka za uslugu '" + usluga + "':\t" + k.Dolazaka.ToString(), "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
-                    else MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
         }
     }
