@@ -1,4 +1,9 @@
-﻿namespace Fitness
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Runtime.InteropServices;
+
+namespace Fitness
 {
     public class Utilities
     {
@@ -32,9 +37,12 @@
 
         public static int GetDaysInMonth(int month, int year)
         {
-            if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) return 31;
-            else if (month == 4 || month == 6 || month == 9 || month == 11) return 30;
-            else if (month == 2) return IsLeapYear(year) == true ? 29 : 28;
+            if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12)
+                return 31;
+            else if (month == 4 || month == 6 || month == 9 || month == 11)
+                return 30;
+            else if (month == 2)
+                return IsLeapYear(year) == true ? 29 : 28;
             else return 0;
         }
 
@@ -44,12 +52,16 @@
             {
                 if (year % 100 == 0)
                 {
-                    if (year % 400 == 0) return true;
-                    else return false;
+                    if (year % 400 == 0)
+                        return true;
+                    else
+                        return false;
                 }
-                else return true;
+                else
+                    return true;
             }
-            else return false;
+            else
+                return false;
         }
 
         public static bool IsDigitsOnly(string str, bool allow_dot = false)
@@ -70,27 +82,27 @@
 
         public static void CreateBackup()
         {
-            if (!System.IO.File.Exists("fitness_backup.sqlite"))
-                System.IO.File.Copy("fitness.sqlite", "fitness_backup.sqlite");
+            if (!File.Exists("fitness_backup.sqlite"))
+                File.Copy("fitness.sqlite", "fitness_backup.sqlite");
             else
             {
-                System.IO.File.Delete("fitness_backup.sqlite");
-                System.IO.File.Copy("fitness.sqlite", "fitness_backup.sqlite");
+                File.Delete("fitness_backup.sqlite");
+                File.Copy("fitness.sqlite", "fitness_backup.sqlite");
             }
         }
 
         public static void ExportFromCsvToSql(string f)
         {
             AllocConsole();
-            System.Threading.Thread.Sleep(500);
+            Thread.Sleep(1000);
             try
             {
-                System.IO.StreamReader file = new System.IO.StreamReader(f, System.Text.Encoding.Default);
+                StreamReader file = new StreamReader(f, System.Text.Encoding.Default);
                 string line;
                 while ((line = file.ReadLine()) != null)
                 {
                     string[] data = line.Split(new char[] { ';' });
-                    int bi = System.Convert.ToInt32(data[0]);
+                    int bi = Convert.ToInt32(data[0]);
                     string[] iip = data[1].Split(new char[] { ' ' });
                     string ime = iip[0], prezime = null;
                     if (iip.Length == 2) prezime = iip[1];
@@ -98,7 +110,7 @@
 
                     if (Database.FitnessDB.Korisnici.Count(ko => ko.BrojIskaznice == bi) > 0)
                     {
-                        System.Console.WriteLine("Korisnik sa brojem iskaznice '" + bi + "' već postoji.");
+                        Console.WriteLine("Korisnik sa brojem iskaznice '" + bi + "' već postoji.");
                         continue;
                     }
 
@@ -116,17 +128,24 @@
                     k.AktivnaDo = "";
                     k.Dolazaka = 0;
                     Database.FitnessDB.Korisnici.Add(k);
-                    System.Console.WriteLine(bi + " " + ime + " " + prezime);
+                    Console.WriteLine(bi + " " + ime + " " + prezime);
                 }
                 Database.FitnessDB.Korisnici.Load();
             }
-            catch (System.Exception ex)
+            catch
             {
-                System.Console.WriteLine("\n\n" + ex.ToString() + "\n\n");
+                return;
             }
+            ShowWindow(GetConsoleWindow(), 0);
         }
 
-        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll")]
         private static extern bool AllocConsole();
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }
