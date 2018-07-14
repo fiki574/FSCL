@@ -22,6 +22,8 @@ using System.Data.SQLite;
 using System.IO;
 using Fitness.Database;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Fitness
 {
@@ -31,8 +33,9 @@ namespace Fitness
         public static Form1 Instance = null;
         public static bool loaded, usluga, produlji, promijeni;
         private ContextMenuStrip listboxContextMenu;
+        public static string last = null;
 
-        public Form1(bool dump)
+        public Form1()
         {
             InitializeComponent();
             Instance = this;
@@ -76,6 +79,9 @@ namespace Fitness
                 if (!File.Exists("fitness.sqlite"))
                     SQLiteConnection.CreateFile("fitness.sqlite");
 
+                HttpServer.MapHandlers();
+                new HttpServer().Start();
+
                 FitnessDB.Load();
 
                 string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
@@ -90,18 +96,14 @@ namespace Fitness
                     Utilities.CreateBackup();
                 }
 
-                HttpServer.MapHandlers();
-                new HttpServer().Start();
+                Process.Start($"http://{Utilities.GetLocalIP()}:8080/pregled");
+                File.WriteAllText("javna.txt", $"http://{Utilities.GetPublicIP()}:8080/pregled");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
             }
-
-            if (dump)
-                if (File.Exists("dump.csv"))
-                    Utilities.ExportFromCsvToSql("dump.csv");
         }
 
         private void OnClick(object sender, EventArgs e)
@@ -113,8 +115,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -132,8 +133,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -146,8 +146,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -205,7 +204,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                PrijavaGreske(ex);
             }
         }
 
@@ -226,8 +225,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -240,7 +238,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                PrijavaGreske(ex);
             }
         }
 
@@ -298,8 +296,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -317,8 +314,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -331,7 +327,7 @@ namespace Fitness
                     textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
                     if (loaded == true)
                     {
-                        System.Threading.Thread.Sleep(100);
+                        Thread.Sleep(100);
                         string vrijeme = DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
                         string item = textBox1.Text + "\t\t" + vrijeme + "\t\t" + comboBox1.SelectedItem.ToString();
                         bool contains = false;
@@ -381,7 +377,7 @@ namespace Fitness
                             MessageBox.Show("Korisnik je već prisutan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
                         label:
-                        System.Threading.Thread.Sleep(100);
+                        Thread.Sleep(100);
                         loaded = false;
                         EmptyAll();
                     }
@@ -395,8 +391,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -406,8 +401,7 @@ namespace Fitness
             {
                 int Day = dateTimePicker1.Value.Day, Month = dateTimePicker1.Value.Month, Year = dateTimePicker1.Value.Year;
                 string danass = Day + "." + Month + "." + Year;
-                DateTime dt = new DateTime(Year, Month, Day);
-                DateTime now = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+                DateTime dt = new DateTime(Year, Month, Day), now = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                 if (dt != now)
                 {
                     int[] TotalUsersPerDay = new int[7] { 0, 0, 0, 0, 0, 0, 0 }, NumberOfDays = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -422,41 +416,8 @@ namespace Fitness
                         Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
                         if (d.Index > 0)
                         {
-                            if (o.DayOfWeek == DayOfWeek.Monday)
-                            {
-                                TotalUsersPerDay[0] += d.BrojDolazaka;
-                                NumberOfDays[0] += 1;
-                            }
-                            else if (o.DayOfWeek == DayOfWeek.Tuesday)
-                            {
-                                TotalUsersPerDay[1] += d.BrojDolazaka;
-                                NumberOfDays[1] += 1;
-                            }
-                            else if (o.DayOfWeek == DayOfWeek.Wednesday)
-                            {
-                                TotalUsersPerDay[2] += d.BrojDolazaka;
-                                NumberOfDays[2] += 1;
-                            }
-                            else if (o.DayOfWeek == DayOfWeek.Thursday)
-                            {
-                                TotalUsersPerDay[3] += d.BrojDolazaka;
-                                NumberOfDays[3] += 1;
-                            }
-                            else if (o.DayOfWeek == DayOfWeek.Friday)
-                            {
-                                TotalUsersPerDay[4] += d.BrojDolazaka;
-                                NumberOfDays[4] += 1;
-                            }
-                            else if (o.DayOfWeek == DayOfWeek.Saturday)
-                            {
-                                TotalUsersPerDay[5] += d.BrojDolazaka;
-                                NumberOfDays[5] += 1;
-                            }
-                            else if (o.DayOfWeek == DayOfWeek.Sunday)
-                            {
-                                TotalUsersPerDay[6] += d.BrojDolazaka;
-                                NumberOfDays[6] += 1;
-                            }
+                            TotalUsersPerDay[(int)o.DayOfWeek - 1] += d.BrojDolazaka;
+                            NumberOfDays[(int)o.DayOfWeek - 1] += 1;
                         }
                     }
 
@@ -487,12 +448,10 @@ namespace Fitness
                     if (d.Index > 0)
                         MessageBox.Show("Ukupno dolazaka za datum '" + date + "':\t" + d.BrojDolazaka.ToString(), "DOLASCI", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -549,8 +508,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -595,8 +553,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -653,8 +610,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -699,8 +655,7 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
         }
 
@@ -727,9 +682,26 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                PrijavaGreske(ex);
             }
+        }
+
+        public static void PrijavaGreske(Exception ex)
+        {
+            MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Environment.Exit(0);
+        }
+
+        #region Web stvari
+
+        public int GetTotalMembers()
+        {
+            return FitnessDB.Korisnici.Count(k => true);
+        }
+
+        public int GetActiveMembers()
+        {
+            return FitnessDB.Korisnici.Count(k => k.AktivnaUsluga != "nema aktivne usluge");
         }
 
         public int GetCurrentMembersCount()
@@ -737,22 +709,66 @@ namespace Fitness
             return listBox1.Items.Count;
         }
 
-        public string GetLast()
+        public int GetNumberOfVisitsToday()
         {
-            if (listBox1.Items.Count <= 0)
-                return "nema nikoga";
-
-            return (listBox1.Items[listBox1.Items.Count - 1] as string).Split('\t')[2];
+            return FitnessDB.Dolasci.SingleOrDefault(d => d.Datum == (DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year)).BrojDolazaka;
         }
 
-        public int GetNumberOfVisits()
+        public int GetNumberOfVisitsThisMonth()
         {
-            return FitnessDB.Dolasci.Count(d => d.Datum == (DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year));
+            DateTime now = DateTime.Now;
+            return FitnessDB.Dolasci.SingleOrDefault(d => d.Datum.Contains($"{now.Month}.{now.Year}")).BrojDolazaka;
         }
 
         public int GetTodaysPayments()
         {
             return FitnessDB.Korisnici.Count(k => k.AktivnaOd == (DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year));
         }
+
+        public int GetMonthsPayments()
+        {
+            DateTime now = DateTime.Now;
+            return FitnessDB.Korisnici.Count(k => k.AktivnaOd.Contains($"{now.Month}.{now.Year}"));
+        }
+
+        public Dictionary<string, int> GetVisitsPerDay(int for_last_month)
+        {
+            Dictionary<string, int> results = new Dictionary<string, int>();
+            int[] TotalUsersPerDay = new int[7] { 0, 0, 0, 0, 0, 0, 0 }, NumberOfDays = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
+            DateTime now = DateTime.Now;
+            foreach (DateTime o in EachDay(now.AddMonths(-for_last_month), now))
+            {
+                string date = o.Day + "." + o.Month + "." + o.Year;
+                Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
+                if (d.Index > 0)
+                {
+                    TotalUsersPerDay[(int)o.DayOfWeek - 1] += d.BrojDolazaka;
+                    NumberOfDays[(int)o.DayOfWeek - 1] += 1;
+                }
+            }
+
+            results.Add("PON", NumberOfDays[0] != 0 ? TotalUsersPerDay[0] / NumberOfDays[0] : 0);
+            results.Add("UTO", NumberOfDays[1] != 0 ? TotalUsersPerDay[1] / NumberOfDays[1] : 0);
+            results.Add("SRI", NumberOfDays[2] != 0 ? TotalUsersPerDay[2] / NumberOfDays[2] : 0);
+            results.Add("CET", NumberOfDays[3] != 0 ? TotalUsersPerDay[3] / NumberOfDays[3] : 0);
+            results.Add("PET", NumberOfDays[4] != 0 ? TotalUsersPerDay[4] / NumberOfDays[4] : 0);
+            results.Add("SUB", NumberOfDays[5] != 0 ? TotalUsersPerDay[5] / NumberOfDays[5] : 0);
+            results.Add("NED", NumberOfDays[6] != 0 ? TotalUsersPerDay[6] / NumberOfDays[6] : 0);
+            return results;
+        }
+
+        public int GetNewUsersToday()
+        {
+            DateTime now = DateTime.Now;
+            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja == now.Day + "." + now.Month + "." + now.Year);
+        }
+
+        public int GetNewUsersThisMonth()
+        {
+            DateTime now = DateTime.Now;
+            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja.Contains($"{now.Month}.{now.Year}"));
+        }
+
+        #endregion
     }
 }

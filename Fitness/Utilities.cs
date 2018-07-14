@@ -2,6 +2,8 @@
 using System.IO;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Net.Sockets;
+using System.Net;
 
 namespace Fitness
 {
@@ -91,61 +93,34 @@ namespace Fitness
             }
         }
 
-        public static void ExportFromCsvToSql(string f)
+        public static string GetLocalIP()
         {
-            AllocConsole();
-            Thread.Sleep(1000);
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    return ip.ToString();
+            return "127.0.0.1";
+        }
+
+        public static string GetPublicIP()
+        {
             try
             {
-                StreamReader file = new StreamReader(f, System.Text.Encoding.Default);
-                string line;
-                while ((line = file.ReadLine()) != null)
-                {
-                    string[] data = line.Split(new char[] { ';' });
-                    int bi = Convert.ToInt32(data[0]);
-                    string[] iip = data[1].Split(new char[] { ' ' });
-                    string ime = iip[0], prezime = null;
-                    if (iip.Length == 2) prezime = iip[1];
-                    else if (iip.Length == 3) prezime = iip[1] + " " + iip[2];
-
-                    if (Database.FitnessDB.Korisnici.Count(ko => ko.BrojIskaznice == bi) > 0)
-                    {
-                        Console.WriteLine("Korisnik sa brojem iskaznice '" + bi + "' već postoji.");
-                        continue;
-                    }
-
-                    Database.Korisnik k = new Database.Korisnik();
-                    k.Index = Database.FitnessDB.Korisnici.GenerateIndex();
-                    k.BrojIskaznice = bi;
-                    k.Ime = ime;
-                    k.Prezime = prezime;
-                    k.DatumUclanjenja = "";
-                    k.DatumRodenja = "";
-                    k.ZadnjiDolazak = "nepoznato";
-                    k.Napomena = "";
-                    k.AktivnaUsluga = "nema aktivne usluge";
-                    k.AktivnaOd = "";
-                    k.AktivnaDo = "";
-                    k.Dolazaka = 0;
-                    Database.FitnessDB.Korisnici.Add(k);
-                    Console.WriteLine(bi + " " + ime + " " + prezime);
-                }
-                Database.FitnessDB.Korisnici.Load();
+                return (new WebClient()).DownloadString("http://bot.whatismyipaddress.com/");
             }
             catch
             {
-                return;
+                return "127.0.0.1";
             }
-            ShowWindow(GetConsoleWindow(), 0);
         }
 
         [DllImport("kernel32.dll")]
-        private static extern bool AllocConsole();
+        public static extern bool AllocConsole();
 
         [DllImport("kernel32.dll")]
-        private static extern IntPtr GetConsoleWindow();
+        public static extern IntPtr GetConsoleWindow();
 
         [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
     }
 }

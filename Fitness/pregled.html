@@ -11,14 +11,114 @@
 			<div class="row">
 				<div class="col-lg-3"></div>
 				<div class="col-lg-6 panel panel-default">
-					<h4>Pregled aktivnosti u teretani (@1)</h4>
+					<h4><b>Pregled aktivnosti u teretani (@1)</b></h4>
+					<p>Ukupan broj registriranih korisnika: <span style="color:green;">@Z</span></p>
+					<p>Ukupan broj korisnika sa aktivnom uslugom: <span style="color:green;">@X</span></p>
 					<p>Broj prisutnih korisnika: <span style="color:green;">@2</span></p>
-					<p>Zadnji dolazak: <span style="color:green;">@3</span></p>
-					<p>Produljenja usluga (danas): <span style="color:green;">@4</span></p>
+					<p>Produljenja usluga (danas): <span style="color:green;">@3</span></p>
+					<p>Produljenja usluga (ovaj mjesec): <span style="color:green;">@4</span></p>
 					<p>Ukupno dolazaka (danas): <span style="color:green;">@5</span></p>
+					<p>Ukupno dolazaka (ovaj mjesec): <span style="color:green;">@6</span></p>
+					<p>Novi korisnici (danas): <span style="color:green;">@T</span></p>
+					<p>Novi korisnici (ovaj mjesec): <span style="color:green;">@U</span></p>
+					<p>Prosjek dolazaka po danima (protekli <b>1</b> mjesec):</p>
+					<div class="row" style="text-align:center;">
+						<div class="col-sm-1"></div>
+						<div class="col-sm-1"><span><b>PON</b></span></div>
+						<div class="col-sm-1"><span><b>UTO</b></span></div>
+						<div class="col-sm-1"><span><b>SRI</b></span></div>
+						<div class="col-sm-1"><span><b>CET</b></span></div>
+						<div class="col-sm-1"><span><b>PET</b></span></div>
+						<div class="col-sm-1"><span><b>SUB</b></span></div>
+						<div class="col-sm-1"><span><b>NED</b></span></div>
+					</div>
+					<div class="row" style="text-align:center;">
+						<div class="col-sm-1"></div>
+						<div class="col-sm-1"><span style="color:green;">@7</span></div>
+						<div class="col-sm-1"><span style="color:green;">@8</span></div>
+						<div class="col-sm-1"><span style="color:green;">@9</span></div>
+						<div class="col-sm-1"><span style="color:green;">@A</span></div>
+						<div class="col-sm-1"><span style="color:green;">@B</span></div>
+						<div class="col-sm-1"><span style="color:green;">@C</span></div>
+						<div class="col-sm-1"><span style="color:green;">@D</span></div>
+					</div>
+					<br>
+					
+					<p>Prosjek dolazaka po danima (protekla <b>3</b> mjeseca):</p>
+					<div class="row" style="text-align:center;">
+						<div class="col-sm-1"></div>
+						<div class="col-sm-1"><span><b>PON</b></span></div>
+						<div class="col-sm-1"><span><b>UTO</b></span></div>
+						<div class="col-sm-1"><span><b>SRI</b></span></div>
+						<div class="col-sm-1"><span><b>CET</b></span></div>
+						<div class="col-sm-1"><span><b>PET</b></span></div>
+						<div class="col-sm-1"><span><b>SUB</b></span></div>
+						<div class="col-sm-1"><span><b>NED</b></span></div>
+					</div>
+					<div class="row" style="text-align:center;">
+						<div class="col-sm-1"></div>
+						<div class="col-sm-1"><span style="color:green;">@E</span></div>
+						<div class="col-sm-1"><span style="color:green;">@F</span></div>
+						<div class="col-sm-1"><span style="color:green;">@G</span></div>
+						<div class="col-sm-1"><span style="color:green;">@H</span></div>
+						<div class="col-sm-1"><span style="color:green;">@I</span></div>
+						<div class="col-sm-1"><span style="color:green;">@J</span></div>
+						<div class="col-sm-1"><span style="color:green;">@K</span></div>
+					</div>
+					<br>
+					
+					<p>Prosjek dolazaka po danima (proteklih <b>6</b> mjeseci):</p>
+					<div class="row" style="text-align:center;">
+						<div class="col-sm-1"></div>
+						<div class="col-sm-1"><span><b>PON</b></span></div>
+						<div class="col-sm-1"><span><b>UTO</b></span></div>
+						<div class="col-sm-1"><span><b>SRI</b></span></div>
+						<div class="col-sm-1"><span><b>CET</b></span></div>
+						<div class="col-sm-1"><span><b>PET</b></span></div>
+						<div class="col-sm-1"><span><b>SUB</b></span></div>
+						<div class="col-sm-1"><span><b>NED</b></span></div>
+					</div>
+					<div class="row" style="text-align:center;">
+						<div class="col-sm-1"></div>
+						<div class="col-sm-1"><span style="color:green;">@L</span></div>
+						<div class="col-sm-1"><span style="color:green;">@M</span></div>
+						<div class="col-sm-1"><span style="color:green;">@N</span></div>
+						<div class="col-sm-1"><span style="color:green;">@O</span></div>
+						<div class="col-sm-1"><span style="color:green;">@P</span></div>
+						<div class="col-sm-1"><span style="color:green;">@R</span></div>
+						<div class="col-sm-1"><span style="color:green;">@S</span></div>
+					</div>
+					<br>
+					
+					<p>Dohvat informacija o korisniku <b>po broju kartice</b>:</p>
+					<div class="row">
+						<div class="col-sm-4"><input type="text" id="kid"></div>
+						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', 'id')">Dohvati</button></div>
+					</div>
+					
+					<p>Dohvat korisnika <b>po imenu</b>:</p>
+					<div class="row">
+						<div class="col-sm-4"><input type="text" id="kime"></div>
+						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', 'ime')">Dohvati</button></div>
+					</div>
+					
+					<p>Dohvat korisnika <b>po prezimenu</b>:</p>
+					<div class="row">
+						<div class="col-sm-4"><input type="text" id="kprez"></div>
+						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', 'prez')">Dohvati</button></div>
+					</div>
 				</div>
 				<div class ="col-lg-3"></div>
 			</div>
 		</div>
+		
+	<script>
+		function Redirect(val1, val2) 
+		{
+			var elval = document.getElementById('k' + val2).value;
+			if(elval)
+				window.location.href = 'http://' + val1 + ':8080/korisnik&' + val2 + '=' + elval;
+		}
+	</script>
 	</body>
 </html>
