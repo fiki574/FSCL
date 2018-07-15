@@ -93,19 +93,19 @@
 					<p>Dohvat informacija o korisniku <b>po broju kartice</b>:</p>
 					<div class="row">
 						<div class="col-sm-4"><input type="text" id="kid"></div>
-						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', 'id')">Dohvati</button></div>
+						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', '@a', 'id')">Dohvati</button></div>
 					</div>
 					
 					<p>Dohvat korisnika <b>po imenu</b>:</p>
 					<div class="row">
 						<div class="col-sm-4"><input type="text" id="kime"></div>
-						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', 'ime')">Dohvati</button></div>
+						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', '@a', 'ime')">Dohvati</button></div>
 					</div>
 					
 					<p>Dohvat korisnika <b>po prezimenu</b>:</p>
 					<div class="row">
 						<div class="col-sm-4"><input type="text" id="kprez"></div>
-						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', 'prez')">Dohvati</button></div>
+						<div class="col-sm-8"><button type="button" class="btn" onclick="Redirect('@V', '@a', 'prez')">Dohvati</button></div>
 					</div>
 				</div>
 				<div class ="col-lg-3"></div>
@@ -113,11 +113,11 @@
 		</div>
 		
 	<script>
-		function Redirect(val1, val2) 
+		function Redirect(val1, api, val2) 
 		{
 			var elval = document.getElementById('k' + val2).value;
 			if(elval)
-				window.location.href = 'http://' + val1 + ':8080/korisnik&' + val2 + '=' + elval;
+				window.location.href = 'http://' + val1 + ':8080/korisnik&api=' + api + '&' + val2 + '=' + elval;
 		}
 	</script>
 	</body>

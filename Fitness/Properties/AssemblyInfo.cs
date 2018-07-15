@@ -1,6 +1,6 @@
 ﻿/*
     C# application for administration of gym/fitness memberships etc.
-    Copyright (C) 2016 Bruno Fištrek
+    Copyright (C)2018/2019 Bruno Fištrek
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 */
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Fitness")]
@@ -25,7 +24,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Bruno Fištrek")]
 [assembly: AssemblyProduct("Fitness")]
-[assembly: AssemblyCopyright("Copyright © 2016 Bruno Fištrek")]
+[assembly: AssemblyCopyright("Copyright © 2018/2019 Bruno Fištrek")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]

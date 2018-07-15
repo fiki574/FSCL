@@ -1,6 +1,6 @@
 ﻿/*
     C# application for administration of gym/fitness memberships etc.
-    Copyright (C) 2016 Bruno Fištrek
+    Copyright (C)2018/2019 Bruno Fištrek
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@ namespace Fitness
         public static Form1 Instance = null;
         public static bool loaded, usluga, produlji, promijeni;
         private ContextMenuStrip listboxContextMenu;
-        public static string last = null;
+        public static HttpServer m_http = null;
+        public static string ApiKey = null;
 
         public Form1()
         {
@@ -44,6 +45,7 @@ namespace Fitness
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
+            pictureBox1.Image = System.Drawing.Image.FromFile("Files/sc.ico");
 
             textBox1.KeyDown += new KeyEventHandler(textBox1_KeyDown);
             textBox2.KeyDown += new KeyEventHandler(textBox23_KeyDown);
@@ -73,14 +75,17 @@ namespace Fitness
             usluga = false;
             produlji = false;
             promijeni = false;
+            m_http = null;
+            ApiKey = Utilities.GenerateApiKey();
 
-            try
+            TryCatch(new Action(() =>
             {
                 if (!File.Exists("fitness.sqlite"))
                     SQLiteConnection.CreateFile("fitness.sqlite");
 
                 HttpServer.MapHandlers();
-                new HttpServer().Start();
+                m_http = new HttpServer();
+                m_http.Start();
 
                 FitnessDB.Load();
 
@@ -96,63 +101,41 @@ namespace Fitness
                     Utilities.CreateBackup();
                 }
 
-                Process.Start($"http://{Utilities.GetLocalIP()}:8080/pregled");
-                File.WriteAllText("javna.txt", $"http://{Utilities.GetPublicIP()}:8080/pregled");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
-            }
+                Utilities.SendApiKeyByMail();
+                File.WriteAllText("javna.txt", $"http://{Utilities.GetPublicIP()}:8080/pregled&api=" + ApiKey);
+                Process.Start($"http://{Utilities.GetLocalIP()}:8080/pregled&api=" + ApiKey);
+            }));
         }
 
         private void OnClick(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (listBox1.SelectedItem != null)
                     listBox1.Items.Remove(listBox1.SelectedItem);
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void OnClick2(object sender, EventArgs e)
         {
-            try
+            if (listBox1.SelectedItem != null)
             {
-                if (listBox1.SelectedItem != null)
-                {
-                    string user = listBox1.SelectedItem.ToString();
-                    string[] split = user.Split('\t');
-                    textBox1.Text = split[0];
-                    textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
-                }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
+                textBox1.Text = listBox1.SelectedItem.ToString().Split('\t')[0];
+                textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
             }
         }
 
         private static void OnTimedEvent(object source, System.Timers.ElapsedEventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
-                FitnessDB.Korisnici.Load();
-                FitnessDB.Dolasci.Load();
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+                FitnessDB.Load();
+            }));
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (e.KeyCode == Keys.Enter)
                 {
@@ -201,50 +184,32 @@ namespace Fitness
                         loaded = false;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void EmptyAll()
         {
-            try
-            {
-                textBox1.Text = "";
-                textBox2.Text = "";
-                textBox3.Text = "";
-                textBox4.Text = "";
-                textBox12.Text = "";
-                richTextBox1.Text = "";
-                textBox5.Text = "";
-                comboBox1.SelectedIndex = -1;
-                textBox7.Text = "";
-                textBox8.Text = "";
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            textBox1.Text = "";
+            textBox2.Text = "";
+            textBox3.Text = "";
+            textBox4.Text = "";
+            textBox12.Text = "";
+            richTextBox1.Text = "";
+            textBox5.Text = "";
+            comboBox1.SelectedIndex = -1;
+            textBox7.Text = "";
+            textBox8.Text = "";
         }
 
         private void textBox23_KeyDown(object sender, KeyEventArgs e)
         {
-            try
-            {
-                if (e.KeyCode == Keys.Enter)
-                    button2_Click(sender, e);
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            if (e.KeyCode == Keys.Enter)
+                button2_Click(sender, e);
         }
 
         private void button7_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (!string.IsNullOrEmpty(textBox10.Text) && !string.IsNullOrEmpty(textBox9.Text) && !string.IsNullOrEmpty(textBox11.Text) && !string.IsNullOrEmpty(textBox9.Text))
                 {
@@ -293,16 +258,12 @@ namespace Fitness
                 }
                 else
                     MessageBox.Show("Neka polja su prazna!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                 {
@@ -311,21 +272,17 @@ namespace Fitness
                     FitnessDB.Korisnici.Update(k);
                     MessageBox.Show("Napomena uspješno spremljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            try
+            if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
             {
-                if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
+                textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                if (loaded == true)
                 {
-                    textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
-                    if (loaded == true)
+                    TryCatch(new Action(() =>
                     {
                         Thread.Sleep(100);
                         string vrijeme = DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
@@ -366,6 +323,7 @@ namespace Fitness
                                     d.BrojDolazaka += 1;
                                     FitnessDB.Dolasci.Update(d);
                                 }
+
                                 k.ZadnjiDolazak = danas + " u " + DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
                                 FitnessDB.Korisnici.Update(k);
                                 goto label;
@@ -380,24 +338,21 @@ namespace Fitness
                         Thread.Sleep(100);
                         loaded = false;
                         EmptyAll();
-                    }
-                    else
-                    {
-                        loaded = false;
-                        EmptyAll();
-                    }
+                    }));
                 }
-                else EmptyAll();
+                else
+                {
+                    loaded = false;
+                    EmptyAll();
+                }
             }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            else
+                EmptyAll();
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 int Day = dateTimePicker1.Value.Day, Month = dateTimePicker1.Value.Month, Year = dateTimePicker1.Value.Year;
                 string danass = Day + "." + Month + "." + Year;
@@ -407,7 +362,7 @@ namespace Fitness
                     int[] TotalUsersPerDay = new int[7] { 0, 0, 0, 0, 0, 0, 0 }, NumberOfDays = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
                     string output = null;
                     Dolasci danas = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danass);
-                    if(danas.Index > 0)
+                    if (danas.Index > 0)
                         output = "Ukupno dolazaka za datum '" + dt.ToString("dd.MM.yyyy") + "':\t" + danas.BrojDolazaka.ToString();
 
                     foreach (DateTime o in EachDay(dt, now))
@@ -416,14 +371,18 @@ namespace Fitness
                         Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
                         if (d.Index > 0)
                         {
-                            TotalUsersPerDay[(int)o.DayOfWeek - 1] += d.BrojDolazaka;
-                            NumberOfDays[(int)o.DayOfWeek - 1] += 1;
+                            int pos = (int)o.DayOfWeek - 1;
+                            if (pos < 0)
+                                pos = 6;
+
+                            TotalUsersPerDay[pos] += d.BrojDolazaka;
+                            NumberOfDays[pos] += 1;
                         }
                     }
 
                     int Ponedjeljak = 0, Utorak = 0, Srijeda = 0, Cetvrtak = 0, Petak = 0, Subota = 0, Nedjelja = 0;
 
-                    if(NumberOfDays[0] != 0)
+                    if (NumberOfDays[0] != 0)
                         Ponedjeljak = TotalUsersPerDay[0] / NumberOfDays[0];
                     if (NumberOfDays[1] != 0)
                         Utorak = TotalUsersPerDay[1] / NumberOfDays[1];
@@ -448,11 +407,7 @@ namespace Fitness
                     if (d.Index > 0)
                         MessageBox.Show("Ukupno dolazaka za datum '" + date + "':\t" + d.BrojDolazaka.ToString(), "DOLASCI", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
@@ -463,7 +418,7 @@ namespace Fitness
 
         private void button5_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (loaded)
                 {
@@ -489,6 +444,7 @@ namespace Fitness
                                     k.Dolazaka = 8;
                                 if (u == "POJEDINAČNI TRENING")
                                     k.Dolazaka = 1;
+
                                 DateTime dt1 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
                                 k.AktivnaOd = dt1.Day + "." + dt1.Month + "." + dt1.Year;
                                 DateTime dt2 = dt1.AddMonths(1);
@@ -505,16 +461,12 @@ namespace Fitness
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (loaded)
                 {
@@ -550,21 +502,16 @@ namespace Fitness
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (!loaded)
                 {
-                    string ime = textBox2.Text.ToLowerInvariant();
-                    string prezime = textBox3.Text.ToLowerInvariant();
+                    string ime = textBox2.Text.ToLowerInvariant(), prezime = textBox3.Text.ToLowerInvariant();
                     if (string.IsNullOrEmpty(ime) && !string.IsNullOrEmpty(prezime))
                     {
                         List<Korisnik> ks = FitnessDB.Korisnici.Select(ko => ko.Prezime.ToLowerInvariant() == prezime);
@@ -607,16 +554,12 @@ namespace Fitness
 
                     EmptyAll();
                 }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (loaded)
                 {
@@ -652,16 +595,12 @@ namespace Fitness
                         }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                PrijavaGreske(ex);
-            }
+            }));
         }
 
         private void label7_Click(object sender, EventArgs e)
         {
-            try
+            TryCatch(new Action(() =>
             {
                 if (loaded)
                 {
@@ -679,17 +618,27 @@ namespace Fitness
                             MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
+            }));
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            Process.Start($"http://{Utilities.GetLocalIP()}:8080/pregled&api=" + ApiKey);
+        }
+
+        public static void TryCatch(Action a)
+        {
+            try
+            {
+                a.Invoke();
             }
             catch (Exception ex)
             {
-                PrijavaGreske(ex);
+                m_http.Stop();
+                m_http = null;
+                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(0);
             }
-        }
-
-        public static void PrijavaGreske(Exception ex)
-        {
-            MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            Environment.Exit(0);
         }
 
         #region Web stvari
@@ -716,8 +665,7 @@ namespace Fitness
 
         public int GetNumberOfVisitsThisMonth()
         {
-            DateTime now = DateTime.Now;
-            return FitnessDB.Dolasci.SingleOrDefault(d => d.Datum.Contains($"{now.Month}.{now.Year}")).BrojDolazaka;
+            return FitnessDB.Dolasci.SingleOrDefault(d => d.Datum.Contains($"{DateTime.Now.Month}.{DateTime.Now.Year}")).BrojDolazaka;
         }
 
         public int GetTodaysPayments()
@@ -727,8 +675,7 @@ namespace Fitness
 
         public int GetMonthsPayments()
         {
-            DateTime now = DateTime.Now;
-            return FitnessDB.Korisnici.Count(k => k.AktivnaOd.Contains($"{now.Month}.{now.Year}"));
+            return FitnessDB.Korisnici.Count(k => k.AktivnaOd.Contains($"{DateTime.Now.Month}.{DateTime.Now.Year}"));
         }
 
         public Dictionary<string, int> GetVisitsPerDay(int for_last_month)
@@ -742,8 +689,12 @@ namespace Fitness
                 Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
                 if (d.Index > 0)
                 {
-                    TotalUsersPerDay[(int)o.DayOfWeek - 1] += d.BrojDolazaka;
-                    NumberOfDays[(int)o.DayOfWeek - 1] += 1;
+                    int pos = (int)o.DayOfWeek - 1;
+                    if (pos < 0)
+                        pos = 6;
+
+                    TotalUsersPerDay[pos] += d.BrojDolazaka;
+                    NumberOfDays[pos] += 1;
                 }
             }
 
@@ -759,14 +710,12 @@ namespace Fitness
 
         public int GetNewUsersToday()
         {
-            DateTime now = DateTime.Now;
-            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja == now.Day + "." + now.Month + "." + now.Year);
+            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja == DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year);
         }
 
         public int GetNewUsersThisMonth()
         {
-            DateTime now = DateTime.Now;
-            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja.Contains($"{now.Month}.{now.Year}"));
+            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja.Contains($"{DateTime.Now.Month}.{DateTime.Now.Year}"));
         }
 
         #endregion

@@ -1,6 +1,6 @@
 ﻿/*
     C# application for administration of gym/fitness memberships etc.
-    Copyright (C) 2016 Bruno Fištrek
+    Copyright (C)2018/2019 Bruno Fištrek
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,14 +78,17 @@ namespace Fitness
             this.label13 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.listBox1 = new System.Windows.Forms.ListBox();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.pictureBox1);
             this.groupBox1.Controls.Add(this.button3);
             this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Controls.Add(this.textBox12);
@@ -115,16 +118,16 @@ namespace Fitness
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(479, 732);
+            this.groupBox1.Size = new System.Drawing.Size(646, 732);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Član";
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(353, 469);
+            this.button3.Location = new System.Drawing.Point(434, 467);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(110, 30);
+            this.button3.Size = new System.Drawing.Size(183, 30);
             this.button3.TabIndex = 29;
             this.button3.Text = "Promijeni";
             this.button3.UseVisualStyleBackColor = true;
@@ -135,7 +138,7 @@ namespace Fitness
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Location = new System.Drawing.Point(120, 434);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(213, 24);
+            this.comboBox1.Size = new System.Drawing.Size(285, 24);
             this.comboBox1.TabIndex = 28;
             // 
             // textBox12
@@ -143,7 +146,7 @@ namespace Fitness
             this.textBox12.Location = new System.Drawing.Point(132, 198);
             this.textBox12.Name = "textBox12";
             this.textBox12.ReadOnly = true;
-            this.textBox12.Size = new System.Drawing.Size(201, 22);
+            this.textBox12.Size = new System.Drawing.Size(273, 22);
             this.textBox12.TabIndex = 27;
             // 
             // label14
@@ -168,7 +171,7 @@ namespace Fitness
             this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Location = new System.Drawing.Point(9, 550);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(454, 171);
+            this.groupBox3.Size = new System.Drawing.Size(631, 171);
             this.groupBox3.TabIndex = 24;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Novi član:";
@@ -177,7 +180,7 @@ namespace Fitness
             // 
             this.textBox13.Location = new System.Drawing.Point(111, 134);
             this.textBox13.Name = "textBox13";
-            this.textBox13.Size = new System.Drawing.Size(213, 22);
+            this.textBox13.Size = new System.Drawing.Size(285, 22);
             this.textBox13.TabIndex = 8;
             // 
             // label15
@@ -191,9 +194,9 @@ namespace Fitness
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(344, 30);
+            this.button7.Location = new System.Drawing.Point(425, 27);
             this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(104, 126);
+            this.button7.Size = new System.Drawing.Size(177, 129);
             this.button7.TabIndex = 6;
             this.button7.Text = "Spremi novog člana";
             this.button7.UseVisualStyleBackColor = true;
@@ -203,7 +206,7 @@ namespace Fitness
             // 
             this.textBox11.Location = new System.Drawing.Point(111, 95);
             this.textBox11.Name = "textBox11";
-            this.textBox11.Size = new System.Drawing.Size(213, 22);
+            this.textBox11.Size = new System.Drawing.Size(285, 22);
             this.textBox11.TabIndex = 5;
             // 
             // label12
@@ -219,7 +222,7 @@ namespace Fitness
             // 
             this.textBox10.Location = new System.Drawing.Point(111, 62);
             this.textBox10.Name = "textBox10";
-            this.textBox10.Size = new System.Drawing.Size(213, 22);
+            this.textBox10.Size = new System.Drawing.Size(285, 22);
             this.textBox10.TabIndex = 3;
             // 
             // label11
@@ -235,7 +238,7 @@ namespace Fitness
             // 
             this.textBox9.Location = new System.Drawing.Point(111, 27);
             this.textBox9.Name = "textBox9";
-            this.textBox9.Size = new System.Drawing.Size(213, 22);
+            this.textBox9.Size = new System.Drawing.Size(285, 22);
             this.textBox9.TabIndex = 1;
             // 
             // label10
@@ -249,9 +252,9 @@ namespace Fitness
             // 
             // button6
             // 
-            this.button6.Location = new System.Drawing.Point(353, 504);
+            this.button6.Location = new System.Drawing.Point(434, 504);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(110, 30);
+            this.button6.Size = new System.Drawing.Size(183, 30);
             this.button6.TabIndex = 23;
             this.button6.Text = "Promijeni";
             this.button6.UseVisualStyleBackColor = true;
@@ -259,9 +262,9 @@ namespace Fitness
             // 
             // button5
             // 
-            this.button5.Location = new System.Drawing.Point(353, 429);
+            this.button5.Location = new System.Drawing.Point(434, 429);
             this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(110, 32);
+            this.button5.Size = new System.Drawing.Size(183, 32);
             this.button5.TabIndex = 22;
             this.button5.Text = "Promijeni";
             this.button5.UseVisualStyleBackColor = true;
@@ -272,7 +275,7 @@ namespace Fitness
             this.textBox8.Location = new System.Drawing.Point(120, 508);
             this.textBox8.Name = "textBox8";
             this.textBox8.ReadOnly = true;
-            this.textBox8.Size = new System.Drawing.Size(213, 22);
+            this.textBox8.Size = new System.Drawing.Size(285, 22);
             this.textBox8.TabIndex = 21;
             // 
             // label9
@@ -289,7 +292,7 @@ namespace Fitness
             this.textBox7.Location = new System.Drawing.Point(120, 473);
             this.textBox7.Name = "textBox7";
             this.textBox7.ReadOnly = true;
-            this.textBox7.Size = new System.Drawing.Size(213, 22);
+            this.textBox7.Size = new System.Drawing.Size(285, 22);
             this.textBox7.TabIndex = 19;
             // 
             // label8
@@ -316,7 +319,7 @@ namespace Fitness
             this.textBox5.Location = new System.Drawing.Point(120, 399);
             this.textBox5.Name = "textBox5";
             this.textBox5.ReadOnly = true;
-            this.textBox5.Size = new System.Drawing.Size(213, 22);
+            this.textBox5.Size = new System.Drawing.Size(285, 22);
             this.textBox5.TabIndex = 15;
             // 
             // label6
@@ -330,9 +333,9 @@ namespace Fitness
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(353, 254);
+            this.button4.Location = new System.Drawing.Point(434, 254);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(110, 125);
+            this.button4.Size = new System.Drawing.Size(183, 125);
             this.button4.TabIndex = 13;
             this.button4.Text = "Spremi promjene";
             this.button4.UseVisualStyleBackColor = true;
@@ -340,9 +343,9 @@ namespace Fitness
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(353, 70);
+            this.button2.Location = new System.Drawing.Point(434, 68);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(110, 66);
+            this.button2.Size = new System.Drawing.Size(183, 68);
             this.button2.TabIndex = 11;
             this.button2.Text = "Nađi po imenu i/ili prezimenu";
             this.button2.UseVisualStyleBackColor = true;
@@ -350,9 +353,9 @@ namespace Fitness
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(353, 32);
+            this.button1.Location = new System.Drawing.Point(434, 27);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(110, 32);
+            this.button1.Size = new System.Drawing.Size(183, 32);
             this.button1.TabIndex = 10;
             this.button1.Text = "Dolazak";
             this.button1.UseVisualStyleBackColor = true;
@@ -362,7 +365,7 @@ namespace Fitness
             // 
             this.richTextBox1.Location = new System.Drawing.Point(9, 254);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(324, 125);
+            this.richTextBox1.Size = new System.Drawing.Size(396, 125);
             this.richTextBox1.TabIndex = 9;
             this.richTextBox1.Text = "";
             // 
@@ -380,7 +383,7 @@ namespace Fitness
             this.textBox4.Location = new System.Drawing.Point(133, 157);
             this.textBox4.Name = "textBox4";
             this.textBox4.ReadOnly = true;
-            this.textBox4.Size = new System.Drawing.Size(200, 22);
+            this.textBox4.Size = new System.Drawing.Size(272, 22);
             this.textBox4.TabIndex = 7;
             // 
             // label4
@@ -396,7 +399,7 @@ namespace Fitness
             // 
             this.textBox3.Location = new System.Drawing.Point(132, 114);
             this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(201, 22);
+            this.textBox3.Size = new System.Drawing.Size(273, 22);
             this.textBox3.TabIndex = 5;
             // 
             // label3
@@ -412,7 +415,7 @@ namespace Fitness
             // 
             this.textBox2.Location = new System.Drawing.Point(132, 70);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(201, 22);
+            this.textBox2.Size = new System.Drawing.Size(273, 22);
             this.textBox2.TabIndex = 3;
             // 
             // label2
@@ -428,7 +431,7 @@ namespace Fitness
             // 
             this.textBox1.Location = new System.Drawing.Point(132, 32);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(201, 22);
+            this.textBox1.Size = new System.Drawing.Size(273, 22);
             this.textBox1.TabIndex = 1;
             // 
             // label1
@@ -445,18 +448,18 @@ namespace Fitness
             this.groupBox4.Controls.Add(this.button8);
             this.groupBox4.Controls.Add(this.dateTimePicker1);
             this.groupBox4.Controls.Add(this.label13);
-            this.groupBox4.Location = new System.Drawing.Point(20, 648);
+            this.groupBox4.Location = new System.Drawing.Point(6, 640);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(568, 73);
+            this.groupBox4.Size = new System.Drawing.Size(568, 81);
             this.groupBox4.TabIndex = 25;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Evidencija ukupnih dnevnih dolazaka:";
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(424, 22);
+            this.button8.Location = new System.Drawing.Point(341, 26);
             this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(138, 30);
+            this.button8.Size = new System.Drawing.Size(221, 30);
             this.button8.TabIndex = 2;
             this.button8.Text = "Prikaži";
             this.button8.UseVisualStyleBackColor = true;
@@ -464,15 +467,15 @@ namespace Fitness
             // 
             // dateTimePicker1
             // 
-            this.dateTimePicker1.Location = new System.Drawing.Point(102, 24);
+            this.dateTimePicker1.Location = new System.Drawing.Point(101, 30);
             this.dateTimePicker1.Name = "dateTimePicker1";
-            this.dateTimePicker1.Size = new System.Drawing.Size(285, 22);
+            this.dateTimePicker1.Size = new System.Drawing.Size(215, 22);
             this.dateTimePicker1.TabIndex = 1;
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(7, 29);
+            this.label13.Location = new System.Drawing.Point(11, 33);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(57, 17);
             this.label13.TabIndex = 0;
@@ -482,9 +485,9 @@ namespace Fitness
             // 
             this.groupBox2.Controls.Add(this.listBox1);
             this.groupBox2.Controls.Add(this.groupBox4);
-            this.groupBox2.Location = new System.Drawing.Point(516, 12);
+            this.groupBox2.Location = new System.Drawing.Point(664, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(615, 732);
+            this.groupBox2.Size = new System.Drawing.Size(604, 732);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Prisutni članovi:";
@@ -495,14 +498,24 @@ namespace Fitness
             this.listBox1.ItemHeight = 16;
             this.listBox1.Location = new System.Drawing.Point(20, 21);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(568, 612);
+            this.listBox1.Size = new System.Drawing.Size(568, 596);
             this.listBox1.TabIndex = 0;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.InitialImage = null;
+            this.pictureBox1.Location = new System.Drawing.Point(496, 160);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(64, 64);
+            this.pictureBox1.TabIndex = 30;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1151, 796);
+            this.ClientSize = new System.Drawing.Size(1280, 753);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
@@ -517,6 +530,7 @@ namespace Fitness
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -566,6 +580,7 @@ namespace Fitness
         private System.Windows.Forms.TextBox textBox13;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿/*
     C# application for administration of gym/fitness memberships etc.
-    Copyright (C) 2016 Bruno Fištrek
+    Copyright (C)2018/2019 Bruno Fištrek
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Credits: https://github.com/usertoroot
 */
 
 using System;
@@ -57,12 +59,14 @@ namespace Fitness.Database
             m_database = database;
 
             object[] attributes = typeof(T).GetCustomAttributes(typeof(DatabaseTable), false);
-            if (attributes.Length < 1) throw new Exception("Missing DatabaseTable attribute on type.");
+            if (attributes.Length < 1)
+                return;
 
             m_databaseTable = (DatabaseTable)attributes[0];
 
             m_indexFieldInfo = typeof(T).GetField("Index");
-            if (m_indexFieldInfo == null) throw new Exception("Index field is missing.");
+            if (m_indexFieldInfo == null)
+                return;
         }
 
         public void Load()
@@ -106,14 +110,16 @@ namespace Fitness.Database
                 for (int i = 0; i < m_entries.Count; i++)
                 {
                     int index = (int)m_indexFieldInfo.GetValue(m_entries[i]);
-                    if (index > m_maxIndex) m_maxIndex = index;
+                    if (index > m_maxIndex)
+                        m_maxIndex = index;
                 }
             }
         }
 
         public void Add(T entry)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return;
 
             lock (m_entries)
             {
@@ -128,7 +134,8 @@ namespace Fitness.Database
 
         public void Remove(int index)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return;
 
             bool found = false;
             T entry = default(T);
@@ -146,13 +153,16 @@ namespace Fitness.Database
                 }
             }
 
-            if (!found) throw new Exception("Entry does not exist.");
-            else Remove(entry);
+            if (!found)
+                return;
+            else
+                Remove(entry);
         }
 
         public void Remove(T entry)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return;
 
             lock (m_entries)
             {
@@ -167,7 +177,8 @@ namespace Fitness.Database
 
         public void Update(T entry)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return;
 
             bool found = false;
 
@@ -184,54 +195,53 @@ namespace Fitness.Database
                 }
             }
 
-            if (!found) throw new Exception("Entry does not exist.");
+            if (!found)
+                return;
             else
                 lock (m_database)
-                {
                     m_database.Update(entry);
-                }
         }
 
         public T Single(int index)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return default(T);
 
             lock (m_entries)
             {
                 for (int i = 0; i < m_entries.Count; i++)
-                {
-                    if (index == (int)m_indexFieldInfo.GetValue(m_entries[i])) return m_entries[i];
-                }
+                    if (index == (int)m_indexFieldInfo.GetValue(m_entries[i]))
+                        return m_entries[i];
             }
 
-            throw new Exception("No entry exists that meets the constraints.");
+            return default(T);
         }
 
         public T Single(Func<T, bool> comparator)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return default(T);
 
             lock (m_entries)
             {
                 for (int i = 0; i < m_entries.Count; i++)
-                {
-                    if (comparator(m_entries[i])) return m_entries[i];
-                }
+                    if (comparator(m_entries[i]))
+                        return m_entries[i];
             }
 
-            throw new Exception("No entry exists that meets the constraints.");
+            return default(T);
         }
 
         public T SingleOrDefault(Func<T, bool> comparator)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return default(T);
 
             lock (m_entries)
             {
                 for (int i = 0; i < m_entries.Count; i++)
-                {
-                    if (comparator(m_entries[i])) return m_entries[i];
-                }
+                    if (comparator(m_entries[i]))
+                        return m_entries[i];
             }
 
             return default(T);
@@ -239,15 +249,15 @@ namespace Fitness.Database
 
         public List<T> Select(Func<T, bool> comparator)
         {
-            if (m_entries == null) throw new Exception("Table not loaded!");
+            if (m_entries == null)
+                return null;
 
             List<T> results = new List<T>();
             lock (m_entries)
             {
                 for (int i = 0; i < m_entries.Count; i++)
-                {
-                    if (comparator(m_entries[i])) results.Add(m_entries[i]);
-                }
+                    if (comparator(m_entries[i]))
+                        results.Add(m_entries[i]);
             }
 
             return results;
@@ -258,9 +268,8 @@ namespace Fitness.Database
             lock (m_entries)
             {
                 for (int i = 0; i < m_entries.Count; i++)
-                {
-                    if (comparator(m_entries[i])) return true;
-                }
+                    if (comparator(m_entries[i]))
+                        return true;
             }
             return false;
         }
@@ -271,9 +280,8 @@ namespace Fitness.Database
             lock (m_entries)
             {
                 for (int i = 0; i < m_entries.Count; i++)
-                {
-                    if (comparator(m_entries[i]))count++;
-                }
+                    if (comparator(m_entries[i]))
+                        count++;
             }
             return count;
         }

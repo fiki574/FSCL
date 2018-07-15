@@ -1,6 +1,6 @@
 ﻿/*
     C# application for administration of gym/fitness memberships etc.
-    Copyright (C) 2016 Bruno Fištrek
+    Copyright (C)2018/2019 Bruno Fištrek
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,12 +14,13 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   
+    Credits: https://github.com/usertoroot
 */
 
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -50,16 +51,14 @@ namespace Fitness.Database
 
         public List<T> GetObjects<T>() where T : struct
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             object[] tableAttribute = typeof(T).GetCustomAttributes(typeof(DatabaseTable), false);
-            Debug.Assert(tableAttribute != null && tableAttribute.Length > 0);
-
             DatabaseTable t = (DatabaseTable)tableAttribute[0];
-
             using (SQLiteCommand cmd = m_connection.CreateCommand())
             {
-                cmd.CommandText = String.Format("SELECT * FROM `{0}`;", t.Name);
+                cmd.CommandText = string.Format("SELECT * FROM `{0}`;", t.Name);
                 using (var reader = cmd.ExecuteReader())
                 {
                     if (reader.HasRows)
@@ -78,39 +77,42 @@ namespace Fitness.Database
                         }
                         return rows;
                     }
-                    else return new List<T>();
+                    else
+                        return new List<T>();
                 }
             }
         }
 
         public void Insert<T>(T value) where T : struct
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             object val = value;
             StringBuilder queryBuilder = new StringBuilder(4096);
 
             Type type = typeof(T);
             object[] o = type.GetCustomAttributes(typeof(DatabaseTable), false);
-            if (o.Length <= 0) throw new Exception("Expected this to have a table attribute.");
+            if (o.Length <= 0)
+                return;
 
             DatabaseTable t = (DatabaseTable)o[0];
             queryBuilder.AppendFormat("INSERT INTO `{0}` (", t.Name);
-
             StringBuilder valueBuilder = new StringBuilder(4096);
             using (var cmd = m_connection.CreateCommand())
             {
                 bool first = true;
                 foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    if (first) first = false;
+                    if (first)
+                        first = false;
                     else
                     {
                         valueBuilder.Append(",");
                         queryBuilder.Append(",");
                     }
 
-                    string parameter = String.Format("@param{0}", field.Name);
+                    string parameter = string.Format("@param{0}", field.Name);
                     valueBuilder.Append(parameter);
                     cmd.Parameters.AddWithValue(parameter, field.GetValue(val));
                     queryBuilder.AppendFormat("`{0}`", field.Name);
@@ -120,20 +122,22 @@ namespace Fitness.Database
                 queryBuilder.Append(valueBuilder);
                 queryBuilder.Append(");");
                 cmd.CommandText = queryBuilder.ToString();
-                int result = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
             }
         }
 
         public void Update<T>(T value) where T : struct
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             object val = value;
             StringBuilder queryBuilder = new StringBuilder(4096);
 
             Type type = typeof(T);
             object[] o = type.GetCustomAttributes(typeof(DatabaseTable), false);
-            if (o.Length <= 0) throw new Exception("Expected this to have a table attribute.");
+            if (o.Length <= 0)
+                return;
 
             DatabaseTable t = (DatabaseTable)o[0];
             queryBuilder.AppendFormat("UPDATE `{0}` SET ", t.Name);
@@ -143,10 +147,15 @@ namespace Fitness.Database
                 bool first = true;
                 foreach (var field in type.GetFields(BindingFlags.Public | BindingFlags.Instance))
                 {
-                    if (field.Name == "Index") continue;
-                    if (first) first = false;
-                    else queryBuilder.Append(",");
-                    string parameter = String.Format("@param{0}", field.Name);
+                    if (field.Name == "Index")
+                        continue;
+
+                    if (first)
+                        first = false;
+                    else
+                        queryBuilder.Append(",");
+
+                    string parameter = string.Format("@param{0}", field.Name);
                     queryBuilder.AppendFormat("`{0}` = " + parameter, field.Name);
                     cmd.Parameters.AddWithValue(parameter, field.GetValue(val));
                 }
@@ -154,104 +163,117 @@ namespace Fitness.Database
                 queryBuilder.Append(" WHERE `Index` = @paramIndex");
                 cmd.Parameters.AddWithValue("@paramIndex", type.GetField("Index").GetValue(val));
                 cmd.CommandText = queryBuilder.ToString();
-                int result = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
             }
         }
 
         public void Remove<T>(T value) where T : struct
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             object val = value;
             StringBuilder queryBuilder = new StringBuilder(4096);
 
             Type type = typeof(T);
             object[] o = type.GetCustomAttributes(typeof(DatabaseTable), false);
-            if (o.Length <= 0) throw new Exception("Expected this to have a table attribute.");
+            if (o.Length <= 0)
+                return;
 
             DatabaseTable t = (DatabaseTable)o[0];
             queryBuilder.AppendFormat("DELETE FROM `{0}` WHERE `Index` = @paramIndex", t.Name);
-
             using (var cmd = m_connection.CreateCommand())
             {
                 cmd.Parameters.AddWithValue("@paramIndex", type.GetField("Index").GetValue(val));
                 cmd.CommandText = queryBuilder.ToString();
-                int reuslt = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
             }
         }
 
         public void CreateStructure(Type t)
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             object[] tableAttributes = t.GetCustomAttributes(typeof(DatabaseTable), false);
-            if (tableAttributes.Length < 1) throw new Exception("Can't create a database structure when the structure is not a FDatabaseTable.");
+            if (tableAttributes.Length < 1)
+                return;
 
             DatabaseTable table = (DatabaseTable)tableAttributes[0];
             using (var cmd = m_connection.CreateCommand())
             {
-                cmd.CommandText = String.Format("DROP TABLE IF EXISTS `{0}`", table.Name);
+                cmd.CommandText =string.Format("DROP TABLE IF EXISTS `{0}`", table.Name);
                 int result = cmd.ExecuteNonQuery();
             }
 
             StringBuilder createBuilder = new StringBuilder(4096);
             createBuilder.AppendFormat("CREATE TABLE `{0}` (", table.Name);
-
             bool first = true;
             foreach (FieldInfo f in t.GetFields())
             {
-                if (first) first = false;
-                else createBuilder.Append(",");
+                if (first)
+                    first = false;
+                else
+                    createBuilder.Append(",");
                 createBuilder.AppendFormat("`{0}` {1}{2}", f.Name, TypeToColumnDescription(f.FieldType), "");
             }
 
             createBuilder.Append(")");
-
             using (var cmd = m_connection.CreateCommand())
             {
                 cmd.CommandText = createBuilder.ToString();
-                int result = cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();
             }
         }
 
         public void UpdateStructure(Type t)
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             object[] tableAttributes = t.GetCustomAttributes(typeof(DatabaseTable), false);
-            if (tableAttributes.Length < 1) throw new Exception("Can't create a database structure when the structure is not a FDatabaseTable.");
+            if (tableAttributes.Length < 1)
+                return;
 
             DatabaseTable table = (DatabaseTable)tableAttributes[0];
 
             List<KeyValuePair<string, Type>> databaseColumns = GetColumns(table);
-            if (!databaseColumns.Exists(c => c.Key == "Index")) throw new Exception("Database structure missing the Index column.");
+            if (!databaseColumns.Exists(c => c.Key == "Index"))
+                return;
 
             List<KeyValuePair<string, Type>> structColumns = t.GetFields().Select(f => new KeyValuePair<string, Type>(f.Name, f.FieldType)).ToList();
 
             var unusedColumns = databaseColumns.Except(structColumns).ToArray();
-            if (unusedColumns.Length > 0) foreach (var col in unusedColumns) RemoveColumn(table, col.Key);
+            if (unusedColumns.Length > 0)
+                foreach (var col in unusedColumns)
+                    RemoveColumn(table, col.Key);
 
             var missingColumns = structColumns.Except(databaseColumns).ToArray();
-            if (missingColumns.Length > 0) foreach (var col in missingColumns) AddColumn(table, col.Key, col.Value);
+            if (missingColumns.Length > 0)
+                foreach (var col in missingColumns)
+                    AddColumn(table, col.Key, col.Value);
         }
 
         public bool ContainsTable(DatabaseTable t)
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
             return m_tables.Contains(t.Name);
         }
 
         private List<KeyValuePair<string, Type>> GetColumns(DatabaseTable table)
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             List<KeyValuePair<string, Type>> columns = new List<KeyValuePair<string, Type>>();
             using (SQLiteCommand cmd = m_connection.CreateCommand())
             {
-                cmd.CommandText = String.Format("SELECT * FROM `{0}`", table.Name);
+                cmd.CommandText = string.Format("SELECT * FROM `{0}`", table.Name);
                 using (var reader = cmd.ExecuteReader(CommandBehavior.SchemaOnly))
                 {
-                    for (int i = 0; i < reader.FieldCount; i++) columns.Add(new KeyValuePair<string, Type>(reader.GetName(i), reader.GetFieldType(i)));
+                    for (int i = 0; i < reader.FieldCount; i++)
+                        columns.Add(new KeyValuePair<string, Type>(reader.GetName(i), reader.GetFieldType(i)));
                 }
             }
             return columns;
@@ -259,13 +281,17 @@ namespace Fitness.Database
 
         private List<string> GetTables()
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             List<string> tables = new List<string>();
             using (SQLiteCommand cmd = m_connection.CreateCommand())
             {
                 cmd.CommandText = "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY 1";
-                using (var reader = cmd.ExecuteReader()) if (reader.HasRows) while (reader.Read()) tables.Add(reader.GetString(0));
+                using (var reader = cmd.ExecuteReader())
+                    if (reader.HasRows)
+                        while (reader.Read())
+                            tables.Add(reader.GetString(0));
             }
 
             return tables;
@@ -273,42 +299,48 @@ namespace Fitness.Database
 
         private void AddColumn(DatabaseTable table, string name, Type t)
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             using (var cmd = m_connection.CreateCommand())
             {
-                cmd.CommandText = String.Format("ALTER TABLE `{0}` ADD `{1}` {2}", table.Name, name, TypeToColumnDescription(t));
-                int result = cmd.ExecuteNonQuery();
+                cmd.CommandText = string.Format("ALTER TABLE `{0}` ADD `{1}` {2}", table.Name, name, TypeToColumnDescription(t));
+                cmd.ExecuteNonQuery();
             }
         }
 
         private void RemoveColumn(DatabaseTable table, string name)
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             using (var cmd = m_connection.CreateCommand())
             {
-                cmd.CommandText = String.Format("ALTER TABLE `{0}` DROP COLUMN `{1}`", table.Name, name);
-                int result = cmd.ExecuteNonQuery();
+                cmd.CommandText = string.Format("ALTER TABLE `{0}` DROP COLUMN `{1}`", table.Name, name);
+                cmd.ExecuteNonQuery();
             }
         }
 
         private void RenameColumn(DatabaseTable table, string oldName, string newName)
         {
-            if (!Connected) Connect();
+            if (!Connected)
+                Connect();
 
             using (var cmd = m_connection.CreateCommand())
             {
-                cmd.CommandText = String.Format("ALTER TABLE `{0}` RENAME COLUMN `{1}` TO `{2}`", table.Name, oldName, newName);
-                int result = cmd.ExecuteNonQuery();
+                cmd.CommandText = string.Format("ALTER TABLE `{0}` RENAME COLUMN `{1}` TO `{2}`", table.Name, oldName, newName);
+                cmd.ExecuteNonQuery();
             }
         }
 
         private string TypeToColumnDescription(Type t)
         {
-            if (t == typeof(int)) return "int";
-            else if (t == typeof(string)) return "text";
-            else throw new Exception("Not a valid column type.");
+            if (t == typeof(int))
+                return "int";
+            else if (t == typeof(string))
+                return "text";
+            else
+                return "null";
         }
 
         private void Connect()
