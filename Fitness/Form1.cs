@@ -80,8 +80,8 @@ namespace Fitness
 
             TryCatch(new Action(() =>
             {
-                if (!File.Exists("fitness.sqlite"))
-                    SQLiteConnection.CreateFile("fitness.sqlite");
+                if (!File.Exists("Files/fitness.sqlite"))
+                    SQLiteConnection.CreateFile("Files/fitness.sqlite");
 
                 HttpServer.MapHandlers();
                 m_http = new HttpServer();
@@ -101,8 +101,8 @@ namespace Fitness
                     Utilities.CreateBackup();
                 }
 
-                Utilities.SendApiKeyByMail();
-                File.WriteAllText("javna.txt", $"http://{Utilities.GetPublicIP()}:8080/pregled&api=" + ApiKey);
+                //Utilities.SendApiKeyByMail();
+                //File.WriteAllText("Files/javna.txt", $"http://{Utilities.GetPublicIP()}:8080/pregled&api=" + ApiKey);
                 Process.Start($"http://{Utilities.GetLocalIP()}:8080/pregled&api=" + ApiKey);
             }));
         }

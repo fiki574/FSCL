@@ -103,13 +103,10 @@ namespace Fitness
 
         public static void CreateBackup()
         {
-            if (!File.Exists("fitness_backup.sqlite"))
-                File.Copy("fitness.sqlite", "fitness_backup.sqlite");
-            else
-            {
-                File.Delete("fitness_backup.sqlite");
-                File.Copy("fitness.sqlite", "fitness_backup.sqlite");
-            }
+            if (File.Exists("Files/fitness_backup.sqlite"))
+                File.Delete("Files/fitness_backup.sqlite");
+
+            File.Copy("Files/fitness.sqlite", "Files/fitness_backup.sqlite");
         }
 
         public static string GetLocalIP()
@@ -142,13 +139,13 @@ namespace Fitness
 
                 SmtpClient SmtpServer = new SmtpClient("smtp.live.com");
                 var email = new MailMessage();
-                email.From = new MailAddress("sender"); //apb
-                email.To.Add("receiver"); //fi3
+                email.From = new MailAddress("");
+                email.To.Add("");
                 email.Subject = "[SCL] Nova poveznica";
                 email.IsBodyHtml = false;
                 email.Body = $"http://{GetPublicIP()}:8080/pregled&api={Form1.ApiKey}";
                 SmtpServer.Port = 587;
-                SmtpServer.Credentials = new NetworkCredential("sender", "pass"); //nno1
+                SmtpServer.Credentials = new NetworkCredential("", "");
                 SmtpServer.EnableSsl = true;
                 SmtpServer.Send(email);
                 email.Dispose();
@@ -159,7 +156,7 @@ namespace Fitness
         }
 
         private static Random random = new Random();
-        public static string GenerateApiKey() //+ mail todo
+        public static string GenerateApiKey()
         {
             const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, 32).Select(s => s[random.Next(s.Length)]).ToArray());
