@@ -21,13 +21,14 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Net.Sockets;
 using System.Net;
-using System.Net.Mail;
 using System.Linq;
 
 namespace Fitness
 {
     public class Utilities
     {
+        private static string PublicIP = null;
+
         public static int UslugaToIndex(string usluga)
         {
             if (usluga == "nema aktivne usluge")
@@ -115,6 +116,7 @@ namespace Fitness
             foreach (var ip in host.AddressList)
                 if (ip.AddressFamily == AddressFamily.InterNetwork)
                     return ip.ToString();
+
             return "127.0.0.1";
         }
 
@@ -122,7 +124,10 @@ namespace Fitness
         {
             try
             {
-                return (new WebClient()).DownloadString("http://bot.whatismyipaddress.com/");
+                if(PublicIP == null)
+                    PublicIP = (new WebClient()).DownloadString("http://bot.whatismyipaddress.com/");
+
+                return PublicIP;
             }
             catch
             {
@@ -130,36 +135,10 @@ namespace Fitness
             }
         }
 
-        public static void SendApiKeyByMail()
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(Form1.ApiKey))
-                    return;
-
-                SmtpClient SmtpServer = new SmtpClient("smtp.live.com");
-                var email = new MailMessage();
-                email.From = new MailAddress("");
-                email.To.Add("");
-                email.Subject = "[SCL] Nova poveznica";
-                email.IsBodyHtml = false;
-                email.Body = $"http://{GetPublicIP()}:8080/pregled&api={Form1.ApiKey}";
-                SmtpServer.Port = 587;
-                SmtpServer.Credentials = new NetworkCredential("", "");
-                SmtpServer.EnableSsl = true;
-                SmtpServer.Send(email);
-                email.Dispose();
-            }
-            catch
-            {
-            }
-        }
-
         private static Random random = new Random();
         public static string GenerateApiKey()
         {
-            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, 32).Select(s => s[random.Next(s.Length)]).ToArray());
+            return new string(Enumerable.Repeat("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 32).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         [DllImport("kernel32.dll")]

@@ -53,7 +53,7 @@ namespace Fitness
         public HttpServer()
         {
             m_listener = new HttpListener();
-            m_listener.Prefixes.Add("http://*:8080/");
+            m_listener.Prefixes.Add("http://*:8181/");
         }
 
         public void Start()
@@ -111,7 +111,7 @@ namespace Fitness
                 if (result == null)
                     return;
 
-                context.Response.ContentEncoding = context.Request.ContentEncoding;
+                context.Response.ContentEncoding = System.Text.Encoding.UTF8;
                 using (StreamWriter writer = new StreamWriter(context.Response.OutputStream, context.Response.ContentEncoding))
                     writer.Write(result);
             }

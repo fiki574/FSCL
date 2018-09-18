@@ -83,10 +83,6 @@ namespace Fitness
                 if (!File.Exists("Files/fitness.sqlite"))
                     SQLiteConnection.CreateFile("Files/fitness.sqlite");
 
-                HttpServer.MapHandlers();
-                m_http = new HttpServer();
-                m_http.Start();
-
                 FitnessDB.Load();
 
                 string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
@@ -99,12 +95,21 @@ namespace Fitness
                     dol.BrojDolazaka = 0;
                     FitnessDB.Dolasci.Add(dol);
                     Utilities.CreateBackup();
-                }
-
-                //Utilities.SendApiKeyByMail();
-                //File.WriteAllText("Files/javna.txt", $"http://{Utilities.GetPublicIP()}:8080/pregled&api=" + ApiKey);
-                Process.Start($"http://{Utilities.GetLocalIP()}:8080/pregled&api=" + ApiKey);
+                }                
             }));
+
+            try
+            {
+                HttpServer.MapHandlers();
+                m_http = new HttpServer();
+                m_http.Start();
+
+                Process.Start($"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + ApiKey);
+            }
+            catch
+            {
+                m_http = null;
+            }
         }
 
         private void OnClick(object sender, EventArgs e)
@@ -623,7 +628,8 @@ namespace Fitness
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            Process.Start($"http://{Utilities.GetLocalIP()}:8080/pregled&api=" + ApiKey);
+            if(m_http != null)
+                Process.Start($"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + ApiKey);
         }
 
         public static void TryCatch(Action a)

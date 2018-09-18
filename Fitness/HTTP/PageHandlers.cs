@@ -38,6 +38,9 @@ namespace Fitness
                     return "Pogrešan 'api' parametar!";
 
                 string text = File.ReadAllText("Files/pregled.html");
+                text = text.Replace("@Y", $"{Utilities.GetPublicIP()}:8181");
+                text = text.Replace("@c", $"{Utilities.GetLocalIP()}:8181");
+                text = text.Replace("@b", Form1.ApiKey);
                 text = text.Replace("@1", DateTime.Now.ToString());
                 text = text.Replace("@Z", Form1.Instance.GetTotalMembers().ToString());
                 text = text.Replace("@X", Form1.Instance.GetActiveMembers().ToString());
@@ -89,7 +92,7 @@ namespace Fitness
         [HttpHandler("/korisnik")]
         private static string HandleKorisnik(HttpServer server, HttpListenerRequest request, Dictionary<string, string> parameters)
         {
-            string result = "Error";
+            string result = "Pogreška", text = "Ne postoji!";
             try
             {
                 if (!parameters.ContainsKey("api"))
@@ -115,7 +118,21 @@ namespace Fitness
                     if (type == 1 && !string.IsNullOrWhiteSpace(parameters["id"]) && !string.IsNullOrEmpty(parameters["id"]))
                     {
                         Korisnik kor = FitnessDB.Korisnici.SingleOrDefault(k => k.BrojIskaznice == Convert.ToInt32(parameters["id"]));
-                        result = $"Indeks u bazi: {kor.Index}<br>Broj kartice: {kor.BrojIskaznice}<br>Ime: {kor.Ime}<br>Prezime: {kor.Prezime}<br>Usluga: {kor.AktivnaUsluga}<br><br><a href=\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8080/pregled&api=" + Form1.ApiKey + "\"><button>Povratak</button></a>";
+                        result = $"<div class=\"col-lg-12 panel panel-default\">\n" +
+                                                $"<h5><b>Pronađeni korisnik</b></h5>\n" +
+                                                $"<p>Ime i prezime: <span style=\"color:green;\">{kor.Ime + " " + kor.Prezime}</span></p>\n" +
+                                                $"<p>Broj iskaznice: <span style=\"color:green;\">{kor.BrojIskaznice}</span></p>\n" +
+                                                $"<p>Usluga: <span style=\"color:green;\">{kor.AktivnaUsluga}</span></p>\n" +
+                                                $"<p>Datum rođenja: <span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(kor.DatumRodenja) ? kor.DatumRodenja : "nepoznato")}</span></p>" +
+                                                $"<p>Datum učlanjenja: <span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(kor.DatumUclanjenja) ? kor.DatumUclanjenja : "nepoznato")}</span></p>" +
+                                                $"<p>Zadnji dolazak: <span style=\"color:green;\">{kor.ZadnjiDolazak}</span></p>" +
+                                                $"<p>Napomena: <br><span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(kor.Napomena) ? kor.Napomena : "/")}</span></p>" +
+                                          $"</div>\n\n";
+
+                        result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8181/pregled&api=" + Form1.ApiKey + "\"><button type=\"button\" class=\"btn\">Povratak</button></a>";
+
+                        text = File.ReadAllText("Files/prikaz.html");
+                        text = text.Replace("@1", result);
                     }
                     else
                     {
@@ -130,10 +147,21 @@ namespace Fitness
                             result = "";
                             int count = 1;
                             foreach (Korisnik k in kors)
-                                result += $"<b>{count++}. pronađeni korisnik</b>:<br>Indeks u bazi: {k.Index}<br>Broj kartice: {k.BrojIskaznice}<br>Ime: {k.Ime}<br>Prezime: {k.Prezime}<br>Usluga: {k.AktivnaUsluga}<br><br>";
+                                result += $"<div class=\"col-lg-12 panel panel-default\">\n" +
+                                                $"<h5><b>{count++}. korisnik</b></h5>\n" +
+                                                $"<p>Ime i prezime: <span style=\"color:green;\">{k.Ime + " " + k.Prezime}</span></p>\n" +
+                                                $"<p>Broj iskaznice: <span style=\"color:green;\">{k.BrojIskaznice}</span></p>\n" + 
+                                                $"<p>Usluga: <span style=\"color:green;\">{k.AktivnaUsluga}</span></p>\n" +
+                                                $"<p>Datum rođenja: <span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(k.DatumRodenja) ? k.DatumRodenja : "nepoznato")}</span></p>" +
+                                                $"<p>Datum učlanjenja: <span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(k.DatumUclanjenja) ? k.DatumUclanjenja : "nepoznato")}</span></p>" +
+                                                $"<p>Zadnji dolazak: <span style=\"color:green;\">{k.ZadnjiDolazak}</span></p>" +
+                                                $"<p>Napomena: <br><span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(k.Napomena) ? k.Napomena : "/")}</span></p>" +
+                                          $"</div>\n\n";
 
-                            result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8080/pregled&api=" + Form1.ApiKey + "\"><button>Povratak</button></a>";
-                        }
+                            result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8181/pregled&api=" + Form1.ApiKey + "\"><button type=\"button\" class=\"btn\">Povratak</button></a>";
+                            text = File.ReadAllText("Files/prikaz.html");
+                            text = text.Replace("@1", result);
+                        }                
                         else
                             result = "Korisnik ne postoji!";
                     }
@@ -142,7 +170,7 @@ namespace Fitness
             catch
             {
             }
-            return result;
+            return text;
         }
     }
 }
