@@ -95,7 +95,7 @@ namespace Fitness
                     dol.BrojDolazaka = 0;
                     FitnessDB.Dolasci.Add(dol);
                     Utilities.CreateBackup();
-                }                
+                }
             }));
 
             try
@@ -123,11 +123,14 @@ namespace Fitness
 
         private void OnClick2(object sender, EventArgs e)
         {
-            if (listBox1.SelectedItem != null)
+            TryCatch(new Action(() =>
             {
-                textBox1.Text = listBox1.SelectedItem.ToString().Split('\t')[0];
-                textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
-            }
+                if (listBox1.SelectedItem != null)
+                {
+                    textBox1.Text = listBox1.SelectedItem.ToString().Split('\t')[0];
+                    textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                }
+            }));
         }
 
         private static void OnTimedEvent(object source, System.Timers.ElapsedEventArgs e)
@@ -385,24 +388,12 @@ namespace Fitness
                         }
                     }
 
-                    int Ponedjeljak = 0, Utorak = 0, Srijeda = 0, Cetvrtak = 0, Petak = 0, Subota = 0, Nedjelja = 0;
+                    int[] Dani = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
+                    for(int i = 0; i < 7; i++)
+                        if (NumberOfDays[i] != 0)
+                            Dani[i] = TotalUsersPerDay[i] / NumberOfDays[i];
 
-                    if (NumberOfDays[0] != 0)
-                        Ponedjeljak = TotalUsersPerDay[0] / NumberOfDays[0];
-                    if (NumberOfDays[1] != 0)
-                        Utorak = TotalUsersPerDay[1] / NumberOfDays[1];
-                    if (NumberOfDays[2] != 0)
-                        Srijeda = TotalUsersPerDay[2] / NumberOfDays[2];
-                    if (NumberOfDays[3] != 0)
-                        Cetvrtak = TotalUsersPerDay[3] / NumberOfDays[3];
-                    if (NumberOfDays[4] != 0)
-                        Petak = TotalUsersPerDay[4] / NumberOfDays[4];
-                    if (NumberOfDays[5] != 0)
-                        Subota = TotalUsersPerDay[5] / NumberOfDays[5];
-                    if (NumberOfDays[6] != 0)
-                        Nedjelja = TotalUsersPerDay[6] / NumberOfDays[6];
-
-                    output += $"\n\n--\n\nProsječni posjetioci po danima od '{danass}':\n\nPonedjeljak: {Ponedjeljak}\nUtorak: {Utorak}\nSrijeda: {Srijeda}\nČetvrtak: {Cetvrtak}\nPetak: {Petak}\nSubota: {Subota}\nNedjelja: {Nedjelja}";
+                    output += $"\n\n--\n\nProsječni posjetioci po danima od '{danass}':\n\nPonedjeljak: {Dani[0]}\nUtorak: {Dani[1]}\nSrijeda: {Dani[2]}\nČetvrtak: {Dani[3]}\nPetak: {Dani[4]}\nSubota: {Dani[5]}\nNedjelja: {Dani[6]}";
                     MessageBox.Show(output, "DOLASCI", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
@@ -628,7 +619,7 @@ namespace Fitness
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            if(m_http != null)
+            if (m_http != null)
                 Process.Start($"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + ApiKey);
         }
 
