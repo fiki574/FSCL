@@ -100,6 +100,9 @@ namespace Fitness
 
             try
             {
+                Utilities.CreateFirewallRule();
+                Utilities.ForwardPort();
+
                 HttpServer.MapHandlers();
                 m_http = new HttpServer();
                 m_http.Start();

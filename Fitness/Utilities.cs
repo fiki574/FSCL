@@ -22,6 +22,7 @@ using System.Runtime.InteropServices;
 using System.Net.Sockets;
 using System.Net;
 using System.Linq;
+using NetFwTypeLib;
 
 namespace Fitness
 {
@@ -139,6 +140,46 @@ namespace Fitness
         public static string GenerateApiKey()
         {
             return new string(Enumerable.Repeat("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 32).Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        public static void CreateFirewallRule()
+        {
+            Type tNetFwPolicy = Type.GetTypeFromProgID("HNetCfg.FwPolicy2");
+            INetFwPolicy2 fwPolicy = (INetFwPolicy2)Activator.CreateInstance(tNetFwPolicy);
+            INetFwRule2 inboundRule = (INetFwRule2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
+            inboundRule.Enabled = true;
+            inboundRule.Action = NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
+            inboundRule.Protocol = 6;
+            inboundRule.LocalPorts = "8181";
+            inboundRule.Name = "FSCL";
+            inboundRule.Profiles = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_ALL;
+            
+            bool add = true;
+            foreach (INetFwRule rule in fwPolicy.Rules)
+                if (rule.Name == "FSCL")
+                {
+                    add = false;
+                    break;
+                }
+
+            if (add)
+                fwPolicy.Rules.Add(inboundRule);
+        }
+
+        public static void ForwardPort()
+        {
+            NATUPNPLib.UPnPNATClass upnpnat = new NATUPNPLib.UPnPNATClass();
+            NATUPNPLib.IStaticPortMappingCollection mappings = upnpnat.StaticPortMappingCollection;
+            bool add = true;
+            foreach(NATUPNPLib.IStaticPortMapping m in mappings)
+                if(m.Description == "HTTP-SSL")
+                {
+                    add = false;
+                    break;
+                }
+
+            if(add)
+                mappings.Add(8181, "TCP", 8181, GetLocalIP(), true, "HTTP-SCL");
         }
 
         [DllImport("kernel32.dll")]
