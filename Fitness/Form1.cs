@@ -31,57 +31,50 @@ namespace Fitness
     {
         public static SQLiteConnection m_dbConnection = null;
         public static Form1 Instance = null;
+        public static HttpServer m_http = null;
+
         public static bool loaded, usluga, produlji, promijeni;
         private ContextMenuStrip listboxContextMenu;
-        public static HttpServer m_http = null;
-        public static string ApiKey = null;
 
         public Form1()
         {
             InitializeComponent();
             Instance = this;
+            Constants.ApiKey = Utilities.GenerateApiKey();
+            Constants.LocalUrl = $"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + Constants.ApiKey;
 
             System.Timers.Timer aTimer = new System.Timers.Timer(5000);
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
-            pictureBox1.Image = System.Drawing.Image.FromFile("Files/sc.ico");
+            pictureBox1.Image = System.Drawing.Image.FromFile(Constants.IconLocation);
 
             textBox1.KeyDown += new KeyEventHandler(textBox1_KeyDown);
             textBox2.KeyDown += new KeyEventHandler(textBox23_KeyDown);
             textBox3.KeyDown += new KeyEventHandler(textBox23_KeyDown);
 
             listboxContextMenu = new ContextMenuStrip();
-            listboxContextMenu.Items.Add("Odlazak");
-            listboxContextMenu.Items.Add("Prikaži korisničke podatke");
-            listboxContextMenu.Items[0].Click += new EventHandler(OnClick);
-            listboxContextMenu.Items[1].Click += new EventHandler(OnClick2);
+            foreach (string item in Constants.Menu)
+                listboxContextMenu.Items.Add(item);
+
+            for(int i = 0; i < listboxContextMenu.Items.Count; i++)
+                listboxContextMenu.Items[i].Click += new EventHandler(OnClick);
+
             listBox1.ContextMenuStrip = listboxContextMenu;
 
-            comboBox1.Items.Add("nema aktivne usluge");
-            comboBox1.Items.Add("TERETANA NEO");
-            comboBox1.Items.Add("TERETANA NEO DO 16H");
-            comboBox1.Items.Add("TERETANA SA POP NEO");
-            comboBox1.Items.Add("TERETANA SA POP DO 16H");
-            comboBox1.Items.Add("TERETANA 12 DOLAZAKA");
-            comboBox1.Items.Add("GRUPNI TRENINZI 2X TJEDNO");
-            comboBox1.Items.Add("GRUPNI TRENINZI NEO");
-            comboBox1.Items.Add("GRUPNI TRENINZI SA POP NEO");
-            comboBox1.Items.Add("KOREKTIVNA");
-            comboBox1.Items.Add("POJEDINAČNI TRENING");
-            comboBox1.Enabled = false;
+            foreach (string usluga in Constants.Usluge)
+                comboBox1.Items.Add(usluga);
 
             loaded = false;
             usluga = false;
             produlji = false;
             promijeni = false;
-            m_http = null;
-            ApiKey = Utilities.GenerateApiKey();
+            comboBox1.Enabled = false;
 
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
-                if (!File.Exists("Files/fitness.sqlite"))
-                    SQLiteConnection.CreateFile("Files/fitness.sqlite");
+                if (!File.Exists(Constants.DbLocation))
+                    SQLiteConnection.CreateFile(Constants.DbLocation);
 
                 FitnessDB.Load();
 
@@ -96,9 +89,9 @@ namespace Fitness
                     FitnessDB.Dolasci.Add(dol);
                     Utilities.CreateBackup();
                 }
-            }));
+            });
 
-            try
+            TryCatch(() =>
             {
                 Utilities.CreateFirewallRule();
                 Utilities.ForwardPort();
@@ -107,46 +100,42 @@ namespace Fitness
                 m_http = new HttpServer();
                 m_http.Start();
 
-                Process.Start($"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + ApiKey);
-            }
-            catch
-            {
-                m_http = null;
-            }
+                Process.Start(Constants.LocalUrl);
+            }, false);
         }
 
         private void OnClick(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
-                if (listBox1.SelectedItem != null)
-                    listBox1.Items.Remove(listBox1.SelectedItem);
-            }));
-        }
-
-        private void OnClick2(object sender, EventArgs e)
-        {
-            TryCatch(new Action(() =>
-            {
-                if (listBox1.SelectedItem != null)
+                string item = ((ToolStripItem)sender).ToString();
+                if(item == "Odlazak")
                 {
-                    textBox1.Text = listBox1.SelectedItem.ToString().Split('\t')[0];
-                    textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                    if (listBox1.SelectedItem != null)
+                        listBox1.Items.Remove(listBox1.SelectedItem);
                 }
-            }));
+                else if(item == "Prikaži korisničke podatke")
+                {
+                    if (listBox1.SelectedItem != null)
+                    {
+                        textBox1.Text = listBox1.SelectedItem.ToString().Split('\t')[0];
+                        textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                    }
+                }
+            });
         }
 
         private static void OnTimedEvent(object source, System.Timers.ElapsedEventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 FitnessDB.Load();
-            }));
+            });
         }
 
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (e.KeyCode == Keys.Enter)
                 {
@@ -177,7 +166,7 @@ namespace Fitness
                             textBox12.Text = k.DatumRodenja;
                             richTextBox1.Text = k.Napomena;
                             textBox5.Text = k.ZadnjiDolazak;
-                            comboBox1.SelectedIndex = Utilities.UslugaToIndex(k.AktivnaUsluga);
+                            comboBox1.SelectedIndex = Constants.Usluge.IndexOf(k.AktivnaUsluga);
                             textBox7.Text = k.AktivnaOd;
                             textBox8.Text = k.AktivnaDo;
                             loaded = true;
@@ -195,7 +184,7 @@ namespace Fitness
                         loaded = false;
                     }
                 }
-            }));
+            });
         }
 
         private void EmptyAll()
@@ -220,7 +209,7 @@ namespace Fitness
 
         private void button7_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (!string.IsNullOrEmpty(textBox10.Text) && !string.IsNullOrEmpty(textBox9.Text) && !string.IsNullOrEmpty(textBox11.Text) && !string.IsNullOrEmpty(textBox9.Text))
                 {
@@ -269,21 +258,24 @@ namespace Fitness
                 }
                 else
                     MessageBox.Show("Neka polja su prazna!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }));
+            });
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                 {
-                    Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == Convert.ToInt32(textBox1.Text));
-                    k.Napomena = richTextBox1.Text;
-                    FitnessDB.Korisnici.Update(k);
-                    MessageBox.Show("Napomena uspješno spremljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == Convert.ToInt32(textBox1.Text) && ko.Ime == textBox2.Text && ko.Prezime == textBox3.Text);
+                    if(k.Index > 0)
+                    {
+                        k.Napomena = richTextBox1.Text;
+                        FitnessDB.Korisnici.Update(k);
+                        MessageBox.Show("Napomena uspješno spremljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
-            }));
+            });
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -293,7 +285,7 @@ namespace Fitness
                 textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
                 if (loaded == true)
                 {
-                    TryCatch(new Action(() =>
+                    TryCatch(() =>
                     {
                         Thread.Sleep(100);
                         string vrijeme = DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
@@ -349,7 +341,7 @@ namespace Fitness
                         Thread.Sleep(100);
                         loaded = false;
                         EmptyAll();
-                    }));
+                    });
                 }
                 else
                 {
@@ -359,11 +351,12 @@ namespace Fitness
             }
             else
                 EmptyAll();
+
         }
 
         private void button8_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 int Day = dateTimePicker1.Value.Day, Month = dateTimePicker1.Value.Month, Year = dateTimePicker1.Value.Year;
                 string danass = Day + "." + Month + "." + Year;
@@ -392,7 +385,7 @@ namespace Fitness
                     }
 
                     int[] Dani = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
-                    for(int i = 0; i < 7; i++)
+                    for (int i = 0; i < 7; i++)
                         if (NumberOfDays[i] != 0)
                             Dani[i] = TotalUsersPerDay[i] / NumberOfDays[i];
 
@@ -406,7 +399,7 @@ namespace Fitness
                     if (d.Index > 0)
                         MessageBox.Show("Ukupno dolazaka za datum '" + date + "':\t" + d.BrojDolazaka.ToString(), "DOLASCI", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-            }));
+            });
         }
 
         private IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
@@ -417,7 +410,7 @@ namespace Fitness
 
         private void button5_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (loaded)
                 {
@@ -426,12 +419,22 @@ namespace Fitness
                         comboBox1.Enabled = true;
                         button5.Text = "Spremi";
                         usluga = true;
+                        textBox1.Enabled = false;
                     }
                     else if (usluga)
                     {
                         if (!string.IsNullOrEmpty(textBox1.Text) && Utilities.IsDigitsOnly(textBox1.Text))
                         {
                             string u = comboBox1.SelectedItem.ToString();
+                            if (u == "nema aktivne usluge")
+                            {
+                                comboBox1.Enabled = false;
+                                button5.Text = "Promijeni";
+                                usluga = false;
+                                textBox1.Enabled = true;
+                                return;
+                            }
+
                             int bi = Convert.ToInt32(textBox1.Text);
                             Korisnik k = FitnessDB.Korisnici.SingleOrDefault(ko => ko.BrojIskaznice == bi);
                             if (k.Index > 0)
@@ -456,16 +459,17 @@ namespace Fitness
                                 EmptyAll();
                                 textBox1.Text = bi.ToString();
                                 textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
+                                textBox1.Enabled = true;
                             }
                         }
                     }
                 }
-            }));
+            });
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (loaded)
                 {
@@ -476,6 +480,7 @@ namespace Fitness
                             textBox8.ReadOnly = false;
                             button6.Text = "Spremi";
                             produlji = true;
+                            textBox1.Enabled = false;
                         }
                         else if (produlji)
                         {
@@ -491,6 +496,7 @@ namespace Fitness
                                     textBox8.ReadOnly = true;
                                     button6.Text = "Promijeni";
                                     produlji = false;
+                                    textBox1.Enabled = true;
                                     MessageBox.Show("Usluga uspješno produljena!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 }
                                 else
@@ -501,12 +507,12 @@ namespace Fitness
                         }
                     }
                 }
-            }));
+            });
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (!loaded)
                 {
@@ -519,6 +525,7 @@ namespace Fitness
                             string korisnici = null;
                             foreach (Korisnik k in ks)
                                 korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
+
                             MessageBox.Show("Korisnici sa prezimenom '" + prezime + "':\n\n" + korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
@@ -532,6 +539,7 @@ namespace Fitness
                             string korisnici = null;
                             foreach (Korisnik k in ks)
                                 korisnici += k.BrojIskaznice + "\t" + k.Ime + " " + k.Prezime + "\n";
+
                             MessageBox.Show("Korisnici sa imenom '" + ime + "':\n\n" + korisnici, "INFORMACIJA", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
@@ -553,12 +561,12 @@ namespace Fitness
 
                     EmptyAll();
                 }
-            }));
+            });
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (loaded)
                 {
@@ -569,6 +577,7 @@ namespace Fitness
                             textBox7.ReadOnly = false;
                             button3.Text = "Spremi";
                             promijeni = true;
+                            textBox1.Enabled = false;
                         }
                         else if (promijeni)
                         {
@@ -584,6 +593,7 @@ namespace Fitness
                                     textBox7.ReadOnly = true;
                                     button3.Text = "Promijeni";
                                     promijeni = false;
+                                    textBox1.Enabled = true;
                                     MessageBox.Show("Promijenjeno!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 }
                                 else
@@ -594,12 +604,12 @@ namespace Fitness
                         }
                     }
                 }
-            }));
+            });
         }
 
         private void label7_Click(object sender, EventArgs e)
         {
-            TryCatch(new Action(() =>
+            TryCatch(() =>
             {
                 if (loaded)
                 {
@@ -617,16 +627,16 @@ namespace Fitness
                             MessageBox.Show("Broj iskaznice ne smije biti 0 ili prazan!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
-            }));
+            });
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             if (m_http != null)
-                Process.Start($"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + ApiKey);
+                Process.Start(Constants.LocalUrl);
         }
 
-        public static void TryCatch(Action a)
+        public static void TryCatch(Action a, bool exit = true)
         {
             try
             {
@@ -634,10 +644,17 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                m_http.Stop();
-                m_http = null;
-                MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                if (m_http != null)
+                {
+                    m_http.Stop();
+                    m_http = null;
+                }
+
+                if (exit)
+                {
+                    MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(0);
+                }
             }
         }
 

@@ -29,34 +29,7 @@ namespace Fitness
     public class Utilities
     {
         private static string PublicIP = null;
-
-        public static int UslugaToIndex(string usluga)
-        {
-            if (usluga == "nema aktivne usluge")
-                return 0;
-            else if (usluga == "TERETANA NEO")
-                return 1;
-            else if (usluga == "TERETANA NEO DO 16H")
-                return 2;
-            else if (usluga == "TERETANA SA POP NEO")
-                return 3;
-            else if (usluga == "TERETANA SA POP DO 16H")
-                return 4;
-            else if (usluga == "TERETANA 12 DOLAZAKA")
-                return 5;
-            else if (usluga == "GRUPNI TRENINZI 2X TJEDNO")
-                return 6;
-            else if (usluga == "GRUPNI TRENINZI NEO")
-                return 7;
-            else if (usluga == "GRUPNI TRENINZI SA POP NEO")
-                return 8;
-            else if (usluga == "KOREKTIVNA")
-                return 9;
-            else if (usluga == "POJEDINAČNI TRENING")
-                return 10;
-            else
-                return 0;
-        }
+        private static Random random = new Random();
 
         public static int GetDaysInMonth(int month, int year)
         {
@@ -97,18 +70,21 @@ namespace Fitness
                 }
             else
                 foreach (char c in str)
+                {
                     if (c < '0' || c > '9')
                         if (c != '.')
                             return false;
+                }
+
             return true;
         }
 
         public static void CreateBackup()
         {
-            if (File.Exists("Files/fitness_backup.sqlite"))
-                File.Delete("Files/fitness_backup.sqlite");
+            if (File.Exists(Constants.DbBackupLocation))
+                File.Delete(Constants.DbBackupLocation);
 
-            File.Copy("Files/fitness.sqlite", "Files/fitness_backup.sqlite");
+            File.Copy(Constants.DbLocation, Constants.DbBackupLocation);
         }
 
         public static string GetLocalIP()
@@ -136,10 +112,9 @@ namespace Fitness
             }
         }
 
-        private static Random random = new Random();
         public static string GenerateApiKey()
         {
-            return new string(Enumerable.Repeat("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 32).Select(s => s[random.Next(s.Length)]).ToArray());
+            return new string(Enumerable.Repeat(Constants.ApiContent, Constants.ApiKeyLength).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
         public static void CreateFirewallRule()

@@ -20,7 +20,7 @@ namespace Fitness.Database
 {
     class FitnessDB
     {
-        private static Database Server = new Database("Files/fitness.sqlite");
+        private static Database Server = new Database(Constants.DbLocation);
         public static Table<Korisnik> Korisnici = new Table<Korisnik>(Server);
         public static Table<Dolasci> Dolasci = new Table<Dolasci>(Server);
 

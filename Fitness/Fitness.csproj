@@ -75,6 +75,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
     <Compile Include="Database\Database.cs" />
     <Compile Include="Database\DatabaseTable.cs" />
     <Compile Include="Database\Dolasci.cs" />

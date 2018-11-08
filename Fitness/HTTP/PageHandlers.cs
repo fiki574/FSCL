@@ -29,18 +29,16 @@ namespace Fitness
         [HttpHandler("/pregled")]
         private static string HandlePregled(HttpServer server, HttpListenerRequest request, Dictionary<string, string> parameters)
         {
+            string text = "";
             try
             {
-                if (!parameters.ContainsKey("api"))
-                    return "Nedostaje 'api' parametar!";
+                if (!parameters.ContainsKey("api") || parameters["api"] != Constants.ApiKey)
+                    return "API error";
 
-                if (parameters["api"] != Form1.ApiKey)
-                    return "Pogrešan 'api' parametar!";
-
-                string text = File.ReadAllText("Files/pregled.html");
+                text = File.ReadAllText(Constants.PregledLocation);
                 text = text.Replace("@Y", $"{Utilities.GetPublicIP()}:8181");
                 text = text.Replace("@c", $"{Utilities.GetLocalIP()}:8181");
-                text = text.Replace("@b", Form1.ApiKey);
+                text = text.Replace("@b", Constants.ApiKey);
                 text = text.Replace("@1", DateTime.Now.ToString());
                 text = text.Replace("@Z", Form1.Instance.GetTotalMembers().ToString());
                 text = text.Replace("@X", Form1.Instance.GetActiveMembers().ToString());
@@ -52,7 +50,7 @@ namespace Fitness
                 text = text.Replace("@T", Form1.Instance.GetNewUsersToday().ToString());
                 text = text.Replace("@U", Form1.Instance.GetNewUsersThisMonth().ToString());
                 text = request.IsLocal ? text.Replace("@V", Utilities.GetLocalIP()) : text.Replace("@V", Utilities.GetPublicIP());
-                text = text.Replace("@a", Form1.ApiKey);
+                text = text.Replace("@a", Constants.ApiKey);
 
                 #region Prosječni dolasci
 
@@ -80,30 +78,25 @@ namespace Fitness
                 text = text.Replace("@S", MonthVisitsLastSixMonths["NED"].ToString());
 
                 #endregion
-
-                return text;
             }
             catch
             {
-                return "Error";
             }
+            return text;
         }
 
         [HttpHandler("/korisnik")]
         private static string HandleKorisnik(HttpServer server, HttpListenerRequest request, Dictionary<string, string> parameters)
         {
-            string result = "Pogreška", text = "Ne postoji!";
+            string result = "", text = "";
             try
             {
-                if (!parameters.ContainsKey("api"))
-                    return "Nedostaje 'api' parametar!";
-
-                if (parameters["api"] != Form1.ApiKey)
-                    return "Pogrešan 'api' ključ!";
+                if (!parameters.ContainsKey("api") || parameters["api"] != Constants.ApiKey)
+                    return "API error";
 
                 byte type = 0;
                 if (!parameters.ContainsKey("id") && !parameters.ContainsKey("ime") && !parameters.ContainsKey("prez"))
-                    return "Nedostaje parametar!";
+                    return "Param error";
                 else if (parameters.ContainsKey("id") && !parameters.ContainsKey("ime") && !parameters.ContainsKey("prez"))
                     type = 1;
                 else if (!parameters.ContainsKey("id") && parameters.ContainsKey("ime") && !parameters.ContainsKey("prez"))
@@ -111,7 +104,7 @@ namespace Fitness
                 else if (!parameters.ContainsKey("id") && !parameters.ContainsKey("ime") && parameters.ContainsKey("prez"))
                     type = 3;
                 else
-                    return "Neispravan tip pretrage!";
+                    return "Search error";
 
                 if (type > 0)
                 {
@@ -129,9 +122,9 @@ namespace Fitness
                                                 $"<p>Napomena: <br><span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(kor.Napomena) ? kor.Napomena : "/")}</span></p>" +
                                           $"</div>\n\n";
 
-                        result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8181/pregled&api=" + Form1.ApiKey + "\"><button type=\"button\" class=\"btn\">Povratak</button></a>";
+                        result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8181/pregled&api=" + Constants.ApiKey + "\"><button type=\"button\" class=\"btn\">Povratak</button></a>";
 
-                        text = File.ReadAllText("Files/prikaz.html");
+                        text = File.ReadAllText(Constants.PrikazLocation);
                         text = text.Replace("@1", result);
                     }
                     else
@@ -158,8 +151,8 @@ namespace Fitness
                                                 $"<p>Napomena: <br><span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(k.Napomena) ? k.Napomena : "/")}</span></p>" +
                                           $"</div>\n\n";
 
-                            result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8181/pregled&api=" + Form1.ApiKey + "\"><button type=\"button\" class=\"btn\">Povratak</button></a>";
-                            text = File.ReadAllText("Files/prikaz.html");
+                            result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8181/pregled&api=" + Constants.ApiKey + "\"><button type=\"button\" class=\"btn\">Povratak</button></a>";
+                            text = File.ReadAllText(Constants.PrikazLocation);
                             text = text.Replace("@1", result);
                         }                
                         else

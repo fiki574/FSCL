@@ -103,6 +103,7 @@ namespace Fitness
                 string[] raw = context.Request.RawUrl.Split('&');
                 if (raw[0] == "/favicon.ico")
                     return;
+
                 if (!_handlers.TryGetValue(raw[0], out pair))
                     return;
 
