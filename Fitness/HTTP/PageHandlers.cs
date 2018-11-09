@@ -17,6 +17,7 @@
 */
 
 using System.Collections.Generic;
+using System.Net.Mail;
 using System.Net;
 using System.IO;
 using System;
@@ -79,8 +80,9 @@ namespace Fitness
 
                 #endregion
             }
-            catch
+            catch(Exception ex)
             {
+                text = ex.ToString();
             }
             return text;
         }
@@ -111,6 +113,9 @@ namespace Fitness
                     if (type == 1 && !string.IsNullOrWhiteSpace(parameters["id"]) && !string.IsNullOrEmpty(parameters["id"]))
                     {
                         Korisnik kor = FitnessDB.Korisnici.SingleOrDefault(k => k.BrojIskaznice == Convert.ToInt32(parameters["id"]));
+                        if (kor.Index < 1)
+                            return "Korisnik ne postoji";
+
                         result = $"<div class=\"col-lg-12 panel panel-default\">\n" +
                                                 $"<h5><b>Pronađeni korisnik</b></h5>\n" +
                                                 $"<p>Ime i prezime: <span style=\"color:green;\">{kor.Ime + " " + kor.Prezime}</span></p>\n" +
@@ -143,7 +148,7 @@ namespace Fitness
                                 result += $"<div class=\"col-lg-12 panel panel-default\">\n" +
                                                 $"<h5><b>{count++}. korisnik</b></h5>\n" +
                                                 $"<p>Ime i prezime: <span style=\"color:green;\">{k.Ime + " " + k.Prezime}</span></p>\n" +
-                                                $"<p>Broj iskaznice: <span style=\"color:green;\">{k.BrojIskaznice}</span></p>\n" + 
+                                                $"<p>Broj iskaznice: <span style=\"color:green;\">{k.BrojIskaznice}</span></p>\n" +
                                                 $"<p>Usluga: <span style=\"color:green;\">{k.AktivnaUsluga}</span></p>\n" +
                                                 $"<p>Datum rođenja: <span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(k.DatumRodenja) ? k.DatumRodenja : "nepoznato")}</span></p>" +
                                                 $"<p>Datum učlanjenja: <span style=\"color:green;\">{(!string.IsNullOrWhiteSpace(k.DatumUclanjenja) ? k.DatumUclanjenja : "nepoznato")}</span></p>" +
@@ -154,14 +159,53 @@ namespace Fitness
                             result += "<a href =\"http://" + (request.IsLocal ? Utilities.GetLocalIP() : Utilities.GetPublicIP()) + ":8181/pregled&api=" + Constants.ApiKey + "\"><button type=\"button\" class=\"btn\">Povratak</button></a>";
                             text = File.ReadAllText(Constants.PrikazLocation);
                             text = text.Replace("@1", result);
-                        }                
+                        }
                         else
-                            result = "Korisnik ne postoji!";
+                            return "Korisnik ne postoji";
                     }
                 }
             }
-            catch
+            catch(Exception ex)
             {
+                text = ex.ToString();
+            }
+            return text;
+        }
+
+        [HttpHandler("/mail")]
+        private static string HandleMail(HttpServer server, HttpListenerRequest request, Dictionary<string, string> parameters)
+        {
+            string text = "Mail sent to: ";
+            try
+            {
+                if (!parameters.ContainsKey("api") || parameters["api"] != Constants.ApiKey)
+                    return "API error";
+
+                if (!parameters.ContainsKey("sendto"))
+                    return "Param error";
+
+                string mail = parameters["sendto"];
+                if (!mail.Contains("@gmail.com") && !mail.Contains("@hotmail.com"))
+                    return "Mail error, mail = GMail or Hotmail";
+
+                SmtpClient SmtpServer = new SmtpClient("smtp.gmail.com");
+                var email = new MailMessage();
+                email.From = new MailAddress("fiki.xperia@gmail.com");
+                email.To.Add(mail);
+                email.Subject = "[FSCL] Linkovi (" + DateTime.Now + ")";
+                email.IsBodyHtml = false;
+                email.Body = $"Lokalni: {Constants.LocalUrl}\nJavni: {Constants.PublicUrl}\n";
+                SmtpServer.Port = 587;
+                SmtpServer.EnableSsl = true;
+                SmtpServer.Credentials = new NetworkCredential("fiki.xperia@gmail.com", "password"); //K1
+                SmtpServer.Send(email);
+                email.Dispose();
+
+                text += mail;
+            }
+            catch (Exception ex)
+            {
+                text = ex.ToString();
             }
             return text;
         }

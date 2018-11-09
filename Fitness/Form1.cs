@@ -42,6 +42,7 @@ namespace Fitness
             Instance = this;
             Constants.ApiKey = Utilities.GenerateApiKey();
             Constants.LocalUrl = $"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + Constants.ApiKey;
+            Constants.PublicUrl = $"http://{Utilities.GetPublicIP()}:8181/pregled&api=" + Constants.ApiKey;
 
             System.Timers.Timer aTimer = new System.Timers.Timer(5000);
             aTimer.Elapsed += OnTimedEvent;

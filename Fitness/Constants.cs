@@ -12,7 +12,7 @@ namespace Fitness
             DbBackupLocation = "Files/fitness_backup.sqlite",
             ApiContent = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-        public static string ApiKey = null, LocalUrl = null;
+        public static string ApiKey = null, LocalUrl = null, PublicUrl = null;
         public static readonly int ApiKeyLength = 32;
 
         public static readonly List<string> Usluge = new List<string>()
