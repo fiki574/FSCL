@@ -22,7 +22,6 @@ using System.Data.SQLite;
 using System.IO;
 using Fitness.Database;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 
 namespace Fitness
@@ -30,25 +29,17 @@ namespace Fitness
     public partial class Form1 : Form
     {
         public static SQLiteConnection m_dbConnection = null;
-        public static Form1 Instance = null;
-        public static HttpServer m_http = null;
-
         public static bool loaded, usluga, produlji, promijeni;
         private ContextMenuStrip listboxContextMenu;
 
         public Form1()
         {
             InitializeComponent();
-            Instance = this;
-            Constants.ApiKey = Utilities.GenerateApiKey();
-            Constants.LocalUrl = $"http://{Utilities.GetLocalIP()}:8181/pregled&api=" + Constants.ApiKey;
-            Constants.PublicUrl = $"http://{Utilities.GetPublicIP()}:8181/pregled&api=" + Constants.ApiKey;
 
             System.Timers.Timer aTimer = new System.Timers.Timer(5000);
             aTimer.Elapsed += OnTimedEvent;
             aTimer.AutoReset = true;
             aTimer.Enabled = true;
-            pictureBox1.Image = System.Drawing.Image.FromFile(Constants.IconLocation);
 
             textBox1.KeyDown += new KeyEventHandler(textBox1_KeyDown);
             textBox2.KeyDown += new KeyEventHandler(textBox23_KeyDown);
@@ -78,6 +69,7 @@ namespace Fitness
                     SQLiteConnection.CreateFile(Constants.DbLocation);
 
                 FitnessDB.Load();
+                FitnessDB.PopulateStatistikaTable();
 
                 string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
                 Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
@@ -91,18 +83,6 @@ namespace Fitness
                     Utilities.CreateBackup();
                 }
             });
-
-            TryCatch(() =>
-            {
-                Utilities.CreateFirewallRule();
-                Utilities.ForwardPort();
-
-                HttpServer.MapHandlers();
-                m_http = new HttpServer();
-                m_http.Start();
-
-                Process.Start(Constants.LocalUrl);
-            }, false);
         }
 
         private void OnClick(object sender, EventArgs e)
@@ -328,6 +308,13 @@ namespace Fitness
                                     FitnessDB.Dolasci.Update(d);
                                 }
 
+                                Statistika s = FitnessDB.Statistika.SingleOrDefault(sta => sta.BrojKartice == k.BrojIskaznice);
+                                if (s.Index > 0)
+                                {
+                                    s.UkupnoDolazaka += 1;
+                                    FitnessDB.Statistika.Update(s);
+                                }
+
                                 k.ZadnjiDolazak = danas + " u " + DateTime.Now.Hour + "h" + DateTime.Now.Minute + "m";
                                 FitnessDB.Korisnici.Update(k);
                                 goto label;
@@ -403,7 +390,7 @@ namespace Fitness
             });
         }
 
-        private IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
+        public static IEnumerable<DateTime> EachDay(DateTime from, DateTime thru)
         {
             for (var day = from.Date; day.Date <= thru.Date; day = day.AddDays(1))
                 yield return day;
@@ -461,6 +448,13 @@ namespace Fitness
                                 textBox1.Text = bi.ToString();
                                 textBox1_KeyDown(sender, new KeyEventArgs(Keys.Enter));
                                 textBox1.Enabled = true;
+
+                                Statistika s = FitnessDB.Statistika.SingleOrDefault(sta => sta.BrojKartice == k.BrojIskaznice);
+                                if (s.Index > 0)
+                                {
+                                    s.UkupnoPlacanja += 1;
+                                    FitnessDB.Statistika.Update(s);
+                                }
                             }
                         }
                     }
@@ -631,13 +625,12 @@ namespace Fitness
             });
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        private void button9_Click(object sender, EventArgs e)
         {
-            if (m_http != null)
-                Process.Start(Constants.LocalUrl);
+            new Form2().Show();
         }
 
-        public static void TryCatch(Action a, bool exit = true)
+        private static void TryCatch(Action a, bool exit = true)
         {
             try
             {
@@ -645,12 +638,6 @@ namespace Fitness
             }
             catch (Exception ex)
             {
-                if (m_http != null)
-                {
-                    m_http.Stop();
-                    m_http = null;
-                }
-
                 if (exit)
                 {
                     MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -658,84 +645,5 @@ namespace Fitness
                 }
             }
         }
-
-        #region Web stvari
-
-        public int GetTotalMembers()
-        {
-            return FitnessDB.Korisnici.Count(k => true);
-        }
-
-        public int GetActiveMembers()
-        {
-            return FitnessDB.Korisnici.Count(k => k.AktivnaUsluga != "nema aktivne usluge");
-        }
-
-        public int GetCurrentMembersCount()
-        {
-            return listBox1.Items.Count;
-        }
-
-        public int GetNumberOfVisitsToday()
-        {
-            return FitnessDB.Dolasci.SingleOrDefault(d => d.Datum == (DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year)).BrojDolazaka;
-        }
-
-        public int GetNumberOfVisitsThisMonth()
-        {
-            return FitnessDB.Dolasci.SingleOrDefault(d => d.Datum.Contains($"{DateTime.Now.Month}.{DateTime.Now.Year}")).BrojDolazaka;
-        }
-
-        public int GetTodaysPayments()
-        {
-            return FitnessDB.Korisnici.Count(k => k.AktivnaOd == (DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year));
-        }
-
-        public int GetMonthsPayments()
-        {
-            return FitnessDB.Korisnici.Count(k => k.AktivnaOd.Contains($"{DateTime.Now.Month}.{DateTime.Now.Year}"));
-        }
-
-        public Dictionary<string, int> GetVisitsPerDay(int for_last_month)
-        {
-            Dictionary<string, int> results = new Dictionary<string, int>();
-            int[] TotalUsersPerDay = new int[7] { 0, 0, 0, 0, 0, 0, 0 }, NumberOfDays = new int[7] { 0, 0, 0, 0, 0, 0, 0 };
-            DateTime now = DateTime.Now;
-            foreach (DateTime o in EachDay(now.AddMonths(-for_last_month), now))
-            {
-                string date = o.Day + "." + o.Month + "." + o.Year;
-                Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == date);
-                if (d.Index > 0)
-                {
-                    int pos = (int)o.DayOfWeek - 1;
-                    if (pos < 0)
-                        pos = 6;
-
-                    TotalUsersPerDay[pos] += d.BrojDolazaka;
-                    NumberOfDays[pos] += 1;
-                }
-            }
-
-            results.Add("PON", NumberOfDays[0] != 0 ? TotalUsersPerDay[0] / NumberOfDays[0] : 0);
-            results.Add("UTO", NumberOfDays[1] != 0 ? TotalUsersPerDay[1] / NumberOfDays[1] : 0);
-            results.Add("SRI", NumberOfDays[2] != 0 ? TotalUsersPerDay[2] / NumberOfDays[2] : 0);
-            results.Add("CET", NumberOfDays[3] != 0 ? TotalUsersPerDay[3] / NumberOfDays[3] : 0);
-            results.Add("PET", NumberOfDays[4] != 0 ? TotalUsersPerDay[4] / NumberOfDays[4] : 0);
-            results.Add("SUB", NumberOfDays[5] != 0 ? TotalUsersPerDay[5] / NumberOfDays[5] : 0);
-            results.Add("NED", NumberOfDays[6] != 0 ? TotalUsersPerDay[6] / NumberOfDays[6] : 0);
-            return results;
-        }
-
-        public int GetNewUsersToday()
-        {
-            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja == DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year);
-        }
-
-        public int GetNewUsersThisMonth()
-        {
-            return FitnessDB.Korisnici.Count(k => k.DatumUclanjenja.Contains($"{DateTime.Now.Month}.{DateTime.Now.Year}"));
-        }
-
-        #endregion
     }
 }

@@ -23,11 +23,29 @@ namespace Fitness.Database
         private static Database Server = new Database(Constants.DbLocation);
         public static Table<Korisnik> Korisnici = new Table<Korisnik>(Server);
         public static Table<Dolasci> Dolasci = new Table<Dolasci>(Server);
+        public static Table<Statistika> Statistika = new Table<Statistika>(Server);
 
         public static void Load()
         {
             Korisnici.Load();
             Dolasci.Load();
+            Statistika.Load();
+        }
+
+        public static void PopulateStatistikaTable()
+        {
+            if (Statistika.Count(s => true) > 0)
+                return;
+
+            foreach (var korisnik in Korisnici.Select(k => true))
+            {
+                Statistika stat = new Statistika();
+                stat.Index = Statistika.GenerateIndex();
+                stat.BrojKartice = korisnik.BrojIskaznice;
+                stat.UkupnoDolazaka = 0;
+                stat.UkupnoPlacanja = 0;
+                Statistika.Add(stat);
+            }
         }
     }
 }

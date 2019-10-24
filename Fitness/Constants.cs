@@ -5,15 +5,8 @@ namespace Fitness
     public static class Constants
     {
         public static readonly string
-            IconLocation = "Files/sc.ico",
-            PrikazLocation = "Files/prikaz.html",
-            PregledLocation = "Files/pregled.html",
             DbLocation = "Files/fitness.sqlite",
-            DbBackupLocation = "Files/fitness_backup.sqlite",
-            ApiContent = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-        public static string ApiKey = null, LocalUrl = null, PublicUrl = null;
-        public static readonly int ApiKeyLength = 32;
+            DbBackupLocation = "Files/fitness_backup.sqlite";
 
         public static readonly List<string> Usluge = new List<string>()
         {

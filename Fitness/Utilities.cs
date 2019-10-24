@@ -19,18 +19,11 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Net.Sockets;
-using System.Net;
-using System.Linq;
-using NetFwTypeLib;
 
 namespace Fitness
 {
     public class Utilities
     {
-        private static string PublicIP = null;
-        private static Random random = new Random();
-
         public static int GetDaysInMonth(int month, int year)
         {
             if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12)
@@ -85,76 +78,6 @@ namespace Fitness
                 File.Delete(Constants.DbBackupLocation);
 
             File.Copy(Constants.DbLocation, Constants.DbBackupLocation);
-        }
-
-        public static string GetLocalIP()
-        {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                    return ip.ToString();
-
-            return "127.0.0.1";
-        }
-
-        public static string GetPublicIP()
-        {
-            try
-            {
-                if(PublicIP == null)
-                    PublicIP = (new WebClient()).DownloadString("http://bot.whatismyipaddress.com/");
-
-                return PublicIP;
-            }
-            catch
-            {
-                return "127.0.0.1";
-            }
-        }
-
-        public static string GenerateApiKey()
-        {
-            return new string(Enumerable.Repeat(Constants.ApiContent, Constants.ApiKeyLength).Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-
-        public static void CreateFirewallRule()
-        {
-            Type tNetFwPolicy = Type.GetTypeFromProgID("HNetCfg.FwPolicy2");
-            INetFwPolicy2 fwPolicy = (INetFwPolicy2)Activator.CreateInstance(tNetFwPolicy);
-            INetFwRule2 inboundRule = (INetFwRule2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FWRule"));
-            inboundRule.Enabled = true;
-            inboundRule.Action = NET_FW_ACTION_.NET_FW_ACTION_ALLOW;
-            inboundRule.Protocol = 6;
-            inboundRule.LocalPorts = "8181";
-            inboundRule.Name = "FSCL";
-            inboundRule.Profiles = (int)NET_FW_PROFILE_TYPE2_.NET_FW_PROFILE2_ALL;
-            
-            bool add = true;
-            foreach (INetFwRule rule in fwPolicy.Rules)
-                if (rule.Name == "FSCL")
-                {
-                    add = false;
-                    break;
-                }
-
-            if (add)
-                fwPolicy.Rules.Add(inboundRule);
-        }
-
-        public static void ForwardPort()
-        {
-            NATUPNPLib.UPnPNATClass upnpnat = new NATUPNPLib.UPnPNATClass();
-            NATUPNPLib.IStaticPortMappingCollection mappings = upnpnat.StaticPortMappingCollection;
-            bool add = true;
-            foreach(NATUPNPLib.IStaticPortMapping m in mappings)
-                if(m.Description == "HTTP-SSL")
-                {
-                    add = false;
-                    break;
-                }
-
-            if(add)
-                mappings.Add(8181, "TCP", 8181, GetLocalIP(), true, "HTTP-SCL");
         }
 
         [DllImport("kernel32.dll")]

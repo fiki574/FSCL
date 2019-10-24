@@ -1,6 +1,6 @@
 ﻿/*
-    C# Framework with a lot of useful functions and classes
-    Copyright (C) 2018/2019 Bruno Fištrek
+    C# application for administration of gym/fitness memberships etc.
+    Copyright (C)2018/2019 Bruno Fištrek
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,26 +14,16 @@
 
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-    
-    Credits: https://github.com/usertoroot
 */
 
-using System;
-
-namespace Fitness
+namespace Fitness.Database
 {
-    [AttributeUsage(AttributeTargets.Method)]
-    public class HttpHandler : Attribute
+    [DatabaseTable("statistika")]
+    public struct Statistika
     {
-        public string Url
-        {
-            get;
-            private set;
-        }
-
-        public HttpHandler(string url)
-        {
-            Url = url;
-        }
+        public int Index;
+        public int BrojKartice;
+        public int UkupnoPlacanja;
+        public int UkupnoDolazaka;
     }
 }
