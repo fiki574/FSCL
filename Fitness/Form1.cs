@@ -62,6 +62,7 @@ namespace Fitness
             produlji = false;
             promijeni = false;
             comboBox1.Enabled = false;
+            progressBar1.Visible = false;
 
             TryCatch(() =>
             {
@@ -69,7 +70,6 @@ namespace Fitness
                     SQLiteConnection.CreateFile(Constants.DbLocation);
 
                 FitnessDB.Load();
-                FitnessDB.PopulateStatistikaTable();
 
                 string danas = DateTime.Now.Day + "." + DateTime.Now.Month + "." + DateTime.Now.Year;
                 Dolasci d = FitnessDB.Dolasci.SingleOrDefault(dol => dol.Datum == danas);
@@ -83,6 +83,31 @@ namespace Fitness
                     Utilities.CreateBackup();
                 }
             });
+        }
+
+        private void PopulateStatistikaTable()
+        {
+            if (FitnessDB.Statistika.Count(s => true) > 0)
+                return;
+
+            progressBar1.Visible = true;
+            int total = FitnessDB.Korisnici.Count(k => true), one = total / 100, current = 0;
+            foreach (var korisnik in FitnessDB.Korisnici.Select(k => true))
+            {
+                Statistika stat = new Statistika();
+                stat.Index = FitnessDB.Statistika.GenerateIndex();
+                stat.BrojKartice = korisnik.BrojIskaznice;
+                stat.UkupnoDolazaka = 0;
+                stat.UkupnoPlacanja = 0;
+                current++;
+                FitnessDB.Statistika.Add(stat);
+                if (current == one)
+                {
+                    progressBar1.Increment(1);
+                    current = 0;
+                }
+            }
+            progressBar1.Visible = false;
         }
 
         private void OnClick(object sender, EventArgs e)
@@ -218,8 +243,15 @@ namespace Fitness
                                     novi.AktivnaDo = "";
                                     novi.Dolazaka = 0;
                                     FitnessDB.Korisnici.Add(novi);
-                                    MessageBox.Show("Korisnik uspješno dodan!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    FitnessDB.Korisnici.Load();
+
+                                    Statistika statistika = new Statistika();
+                                    statistika.Index = FitnessDB.Statistika.GenerateIndex();
+                                    statistika.BrojKartice = bi;
+                                    statistika.UkupnoDolazaka = 0;
+                                    statistika.UkupnoPlacanja = 0;
+                                    FitnessDB.Statistika.Add(statistika);
+
+                                    MessageBox.Show("Korisnik uspješno dodan!", "USPJEH", MessageBoxButtons.OK, MessageBoxIcon.Information);                                    
                                     textBox9.Text = "";
                                     textBox10.Text = "";
                                     textBox11.Text = "";
@@ -553,7 +585,6 @@ namespace Fitness
                         else
                             MessageBox.Show("Ne postoji korisnik sa tim imenom i prezimenom!", "UPOZORENJE", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
-
                     EmptyAll();
                 }
             });
@@ -627,6 +658,10 @@ namespace Fitness
 
         private void button9_Click(object sender, EventArgs e)
         {
+            TryCatch(() =>
+            {
+                PopulateStatistikaTable();
+            });
             new Form2().Show();
         }
 
@@ -640,7 +675,7 @@ namespace Fitness
             {
                 if (exit)
                 {
-                    MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Otiđite na \"www.pasteboard.co\" sa Google Chrome-om\n3. Prisnite tipku \"Ctrl\" i u isto vrijeme tipku \"V\" (dakle CTRL+V)\n4. Na otvorenoj web stranici odaberite zelenu tipku na kojoj piše \"UPLOAD\"5. Pošaljite mi link koji će se prikazati nakon pritiska na spomenutu tipku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Postupak prijave pogreške:\n1. Slikajte ovu poruku pomoću tipke \"Print Screen\"\n2. Pošaljite mi sliku na sljedeći mail -> fiki.xperia@gmail.com\n\n" + ex.ToString(), "POGREŠKA", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Environment.Exit(0);
                 }
             }

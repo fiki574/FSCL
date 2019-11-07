@@ -31,21 +31,5 @@ namespace Fitness.Database
             Dolasci.Load();
             Statistika.Load();
         }
-
-        public static void PopulateStatistikaTable()
-        {
-            if (Statistika.Count(s => true) > 0)
-                return;
-
-            foreach (var korisnik in Korisnici.Select(k => true))
-            {
-                Statistika stat = new Statistika();
-                stat.Index = Statistika.GenerateIndex();
-                stat.BrojKartice = korisnik.BrojIskaznice;
-                stat.UkupnoDolazaka = 0;
-                stat.UkupnoPlacanja = 0;
-                Statistika.Add(stat);
-            }
-        }
     }
 }

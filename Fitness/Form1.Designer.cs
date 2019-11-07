@@ -77,8 +77,9 @@ namespace Fitness
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.label13 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.button9 = new System.Windows.Forms.Button();
+            this.listBox1 = new System.Windows.Forms.ListBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -481,6 +482,7 @@ namespace Fitness
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.progressBar1);
             this.groupBox2.Controls.Add(this.button9);
             this.groupBox2.Controls.Add(this.listBox1);
             this.groupBox2.Controls.Add(this.groupBox4);
@@ -491,6 +493,23 @@ namespace Fitness
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Prisutni članovi:";
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(20, 649);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(568, 14);
+            this.progressBar1.TabIndex = 27;
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(20, 581);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(568, 62);
+            this.button9.TabIndex = 26;
+            this.button9.Text = "Prikaži statistiku";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
+            // 
             // listBox1
             // 
             this.listBox1.FormattingEnabled = true;
@@ -499,16 +518,6 @@ namespace Fitness
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(568, 548);
             this.listBox1.TabIndex = 0;
-            // 
-            // button9
-            // 
-            this.button9.Location = new System.Drawing.Point(20, 581);
-            this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(568, 80);
-            this.button9.TabIndex = 26;
-            this.button9.Text = "Prikaži statistiku";
-            this.button9.UseVisualStyleBackColor = true;
-            this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // Form1
             // 
@@ -579,6 +588,7 @@ namespace Fitness
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 
